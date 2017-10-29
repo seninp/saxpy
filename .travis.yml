@@ -15,7 +15,6 @@ env:
   - TEST_SUITE=unittest CMAKE_BUILD_TYPE=Debug PRJ_COMPILER=clang
   - TEST_SUITE=unittest CMAKE_BUILD_TYPE=Release PRJ_COMPILER=gcc
   - TEST_SUITE=unittest CMAKE_BUILD_TYPE=Debug PRJ_COMPILER=gcc
-  - TEST_SUITE=benchmark
 
 addons:
   apt:
@@ -31,7 +30,6 @@ install:
   - pip install future
   - pip install --upgrade setuptools
   - if [ $TEST_SUITE = "unittest" ]; then pip install pytest greenify gevent; fi
-  - if [ $TEST_SUITE = "benchmark" ]; then pip install python-memcached pylibmc; fi
 
 script:
   - if [ $PRJ_COMPILER = "gcc" ]; then export CC=gcc CXX=g++; fi
@@ -41,4 +39,3 @@ notifications:
   email:
     on_success: never # default: change
     on_failure: always # default: always
-    
