@@ -1,4 +1,5 @@
 #include <sax.h>
+#include <pybind11/pybind11.h>
 
 std::vector<double> znorm(std::vector<double> ts, double threshold) {
 
@@ -21,4 +22,9 @@ std::vector<double> znorm(std::vector<double> ts, double threshold) {
   }
   return res;
 
+}
+
+PYBIND11_MODULE(example, m) {
+    m.doc() = "pybind11 example plugin"; // optional module docstring
+    m.def("znorm", &znorm, "An implementation of z-normalization");
 }
