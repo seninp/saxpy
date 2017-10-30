@@ -26,7 +26,7 @@ requirements:
 
 test:
   imports:
-    - cmake_example
+    - saxpy
 
 about:
   summary: An example project built with pybind11.
