@@ -1,4 +1,3 @@
-#include <include/sax.h>
 #include <pybind11/pybind11.h>
 
 std::vector<double> znorm(std::vector<double> ts, double threshold) {
