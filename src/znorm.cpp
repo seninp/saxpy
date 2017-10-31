@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <algorithm>
+#include <numeric>
 #include <cctype>
 #include <iostream>
 #include <string>
