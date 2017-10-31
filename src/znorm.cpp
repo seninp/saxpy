@@ -1,4 +1,9 @@
 #include <pybind11/pybind11.h>
+#include <algorithm>
+#include <cctype>
+#include <iostream>
+#include <string>
+#include <vector>
 
 std::vector<double> znorm(std::vector<double> ts, double threshold) {
 
