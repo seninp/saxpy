@@ -5,7 +5,7 @@ matrix:
   - os: linux
     env: PYTHON=2.7
   - os: linux
-    env: PYTHON=3.5
+    env: PYTHON=3.6
   - os: linux
     env: CONDA=2.7
   - os: linux
