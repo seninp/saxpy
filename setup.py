@@ -23,7 +23,7 @@ class get_pybind_include(object):
 ext_modules = [
     Extension(
         'python_example',
-        ['src/main.cpp'],
+        ['src/znorm.cpp'],
         include_dirs=[
             # Path to pybind11 headers
             get_pybind_include(),
