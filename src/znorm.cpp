@@ -40,4 +40,3 @@ PYBIND11_MODULE(saxpy, m) {
 #else
     m.attr("__version__") = "dev";
 #endif
-}
