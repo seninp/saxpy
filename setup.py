@@ -89,7 +89,7 @@ class BuildExt(build_ext):
 
 setup(
     name="saxpy",
-    version="0.1.0",
+    version=__version__,
     url="https://github.com/seninp/saxpy.git",
 
     author="Pavel Senin",
