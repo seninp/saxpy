@@ -22,8 +22,8 @@ class get_pybind_include(object):
 
 ext_modules = [
     Extension(
-        'saxpy',
-        ['src/znorm.cpp'],
+        'python_example',
+        ['src/main.cpp'],
         include_dirs=[
             # Path to pybind11 headers
             get_pybind_include(),
