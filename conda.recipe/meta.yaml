@@ -1,5 +1,5 @@
 package:
-  name: saxpy
+  name: python_example
   version: {{ environ.get('GIT_DESCRIBE_TAG', 'dev') }}
 
 build:
@@ -18,7 +18,6 @@ requirements:
     - python
     - setuptools
     - pybind11
-    - cmake
 
   run:
     - python
