@@ -49,7 +49,7 @@ before_install:
 install:
 - |
   if [ -n "$PYTHON" ]; then
-    pip install numpy pytest
+    pip install --only-binary=numpy,pandas numpy pandas
     python setup.py sdist
     pip install --verbose dist/*.tar.gz
     pip install codecov
