@@ -51,7 +51,7 @@ install:
   if [ -n "$PYTHON" ]; then
     python setup.py sdist
     pip install --verbose dist/*.tar.gz
-    pip install --user codecov
+    pip install codecov
   elif [ -n "$CONDA" ]; then
     conda build conda.recipe
     conda install --use-local saxpy
