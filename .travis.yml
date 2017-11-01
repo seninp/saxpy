@@ -54,7 +54,7 @@ install:
     pip install --verbose dist/*.tar.gz
     pip install codecov
   elif [ -n "$CONDA" ]; then
-    conda install --yes python=$TRAVIS_PYTHON_VERSION numpy pytest
+    conda install numpy pytest
     conda build conda.recipe
     conda install --use-local saxpy
     conda install -c conda-forge codecov
