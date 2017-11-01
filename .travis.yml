@@ -59,10 +59,10 @@ install:
   fi
 
 script:
-  - python tests/test.py
+  - coverage run tests/test.py
 
 after_success:
-  - codecov --token=<59f9838b-d0ff-4249-8050-17c98d24c4b7>
+  - codecov
 
 notifications:
   email:
