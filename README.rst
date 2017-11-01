@@ -9,6 +9,9 @@ saxpy
    :target: https://travis-ci.org/seninp/saxpy
    :alt: Latest Travis CI build status
 
+.. image:: https://codecov.io/gh/seninp/saxpy/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/seninp/saxpy
+
 SAX implementation for Python
 
 Usage
