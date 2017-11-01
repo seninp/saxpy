@@ -62,7 +62,7 @@ script:
   - python tests/test.py
 
 after_success:
-  - codecov
+  - codecov --token=<59f9838b-d0ff-4249-8050-17c98d24c4b7>
 
 notifications:
   email:
