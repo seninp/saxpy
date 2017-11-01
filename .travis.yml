@@ -5,7 +5,7 @@ matrix:
   - os: linux
     env: PYTHON=2.7
   - os: linux
-    env: PYTHON=3.4
+    env: PYTHON=3.5
   - os: linux
     env: CONDA=2.7
   - os: linux
@@ -20,7 +20,12 @@ matrix:
     env: CONDA=3.6
 before_install:
 - |
-  if [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX=g++-4.8 CC=gcc-4.8; fi
+  if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+    if [ "${PYTHON:0:1}" = "3" ]; then
+      pyenv virtualenv -p python3.5 3.5.3 myenv
+    fi
+    export CXX=g++-4.8 CC=gcc-4.8;
+  fi
   if [ -n "$PYTHON" ]; then
     if [ "$TRAVIS_OS_NAME" = "osx" ] && [ "${PYTHON:0:1}" = "3" ]; then
       brew update; brew install python3;
