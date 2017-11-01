@@ -6,7 +6,7 @@ matrix:
   - os: linux
     env: PYTHON=2.7
   - os: linux
-    env: PYTHON=3.5
+    env: PYTHON=3.4
   - os: linux
     env: CONDA=2.7
   - os: linux
@@ -62,10 +62,3 @@ notifications:
   email:
     on_success: never # default: change
     on_failure: always # default: always
-
-addons:
-  apt:
-    sources:
-        - deadsnakes
-    packages:
-        - python3.5
