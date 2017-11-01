@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+namespace py = pybind11;
+
 std::vector<double> znorm(std::vector<double> ts, double threshold) {
 
   double sum = std::accumulate(std::begin(ts), std::end(ts), 0.0);
@@ -30,11 +32,10 @@ std::vector<double> znorm(std::vector<double> ts, double threshold) {
 
 }
 
-namespace py = pybind11;
-
 PYBIND11_MODULE(saxpy, m) {
-    m.doc() = "pybind11 example plugin"; // optional module docstring
-    m.def("znorm", &znorm, "An implementation of z-normalization");
+    m.doc() = "A SAX implementation for Python";
+    m.def("znorm", &znorm, "An implementation of z-normalization",
+      py::arg("ts"), py::arg("threshold") = 0.001);
 
 #ifdef VERSION_INFO
     m.attr("__version__") = VERSION_INFO;
