@@ -17,6 +17,8 @@ requirements:
   build:
     - python
     - setuptools
+    - numpy
+    - pandas
     - pybind11
 
   run:
