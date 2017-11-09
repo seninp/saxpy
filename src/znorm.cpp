@@ -1,13 +1,6 @@
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 #include <algorithm>
 #include <numeric>
-#include <cctype>
-#include <iostream>
-#include <string>
 #include <vector>
-
-namespace py = pybind11;
 
 std::vector<double> znorm(std::vector<double> ts, double threshold) {
 
@@ -28,18 +21,7 @@ std::vector<double> znorm(std::vector<double> ts, double threshold) {
   for(int i=0; i<ts.size(); i++){
     res[i] = (ts[i]-mean)/stdev;
   }
+
   return res;
 
-}
-
-PYBIND11_MODULE(saxpy, m) {
-    m.doc() = "A SAX implementation for Python";
-    m.def("znorm", &znorm, "An implementation of z-normalization",
-      py::arg("ts"), py::arg("threshold") = 0.001);
-
-#ifdef VERSION_INFO
-    m.attr("__version__") = VERSION_INFO;
-#else
-    m.attr("__version__") = "dev";
-#endif
 }
