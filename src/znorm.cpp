@@ -2,7 +2,8 @@
 #include <numeric>
 #include <vector>
 
-std::vector<double> znorm(std::vector<double> ts, double threshold) {
+void init_znorm(py::module &m) {
+    m.def("znorm", [](std::vector<double> ts, double threshold) {
 
   double sum = std::accumulate(std::begin(ts), std::end(ts), 0.0);
   double mean =  sum / ts.size();
@@ -24,4 +25,5 @@ std::vector<double> znorm(std::vector<double> ts, double threshold) {
 
   return res;
 
+  });
 }
