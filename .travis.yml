@@ -49,11 +49,11 @@ before_install:
 install:
 - |
   if [ -n "$PYTHON" ]; then
-    pip install --only-binary=numpy pandas numpy pandas pytest codecov coverage
+    pip install --only-binary=pybind11 pandas numpy pandas pytest codecov coverage
     python setup.py sdist
     pip install --verbose dist/*.tar.gz
   elif [ -n "$CONDA" ]; then
-    conda install numpy pytest codecov coverage
+    conda install pybind11 numpy pytest codecov coverage
     conda build conda.recipe
     conda install --use-local saxpy
   fi
