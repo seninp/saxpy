@@ -49,8 +49,7 @@ before_install:
 install:
 - |
   if [ -n "$PYTHON" ]; then
-    pip install pybind11
-    pip install --only-binary=pandas,numpy,pytest,codecov,coverage
+    pip install pybind11 --only-binary=pandas,numpy,pytest,codecov,coverage
     python setup.py sdist
     pip install --verbose dist/*.tar.gz
   elif [ -n "$CONDA" ]; then
