@@ -43,9 +43,11 @@ before_install:
 install:
 - |
   if [ -n "$PYTHON" ]; then
+    pip install pybind11 --only-binary=pytest,codecov,coverage
     python setup.py sdist
     pip install --verbose dist/*.tar.gz
   elif [ -n "$CONDA" ]; then
+    conda install numpy pytest codecov coverage
     conda build conda.recipe
     conda install --use-local cmake_example
   fi
