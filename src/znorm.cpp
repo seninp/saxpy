@@ -1,7 +1,7 @@
 #include <saxpy.hpp>
 #include <numeric>
 
-std::vector<double> znorm(std::vector<double> ts, double threshold) {
+std::vector<double> znorm(const std::vector<double> ts, double threshold) {
 
     double sum = std::accumulate(std::begin(ts), std::end(ts), 0.0);
     double mean =  sum / ts.size();
