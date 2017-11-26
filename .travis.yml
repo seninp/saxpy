@@ -43,11 +43,11 @@ before_install:
 install:
 - |
   if [ -n "$PYTHON" ]; then
-    pip install pytest codecov
+    pip install numpy pytest codecov
     python setup.py sdist
     pip install --verbose dist/*.tar.gz
   elif [ -n "$CONDA" ]; then
-    conda install pytest codecov
+    conda install numpy pytest codecov
     conda build conda.recipe
     conda install --use-local saxpy
   fi
