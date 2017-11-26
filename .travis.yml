@@ -49,7 +49,7 @@ install:
   elif [ -n "$CONDA" ]; then
     conda install pytest codecov
     conda build conda.recipe
-    conda install --use-local cmake_example
+    conda install --use-local saxpy
   fi
 
 script:
