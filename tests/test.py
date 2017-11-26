@@ -1,6 +1,5 @@
 import pytest
 import numpy as np
-import saxpy as sp
 
 def test_znorm():
 
@@ -9,5 +8,13 @@ def test_znorm():
 
     x_scaled =[x/100.0 for x in ts]
 
+    import saxpy as sp
+
     assert pytest.approx(1.0, 0.000001) == \
                         np.std(sp.znorm(x_scaled, z_thrsh), axis=0, ddof=1)
+
+def capital_case(x):
+    return x.capitalize()
+
+def test_capital_case():
+    assert capital_case('semaphore') == 'Semaphore'
