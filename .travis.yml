@@ -53,7 +53,7 @@ install:
   fi
 
 script:
-  - py.test tests/* --cov=./
+  - py.test tests/* --cov=saxpy
 
 after_success:
   - codecov
