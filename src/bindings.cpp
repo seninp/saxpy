@@ -4,7 +4,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(saxpy, m) {
+PYBIND11_MODULE(_saxpy, m) {
 
     m.def("znorm", &znorm);
 

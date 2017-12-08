@@ -1,3 +1,4 @@
+"""building saxpy."""
 import os
 import re
 import sys
@@ -8,7 +9,8 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
+
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
@@ -68,8 +70,9 @@ setup(
     description="SAX implementation for Python",
     long_description=open('README.rst').read(),
 
-    ext_modules=[CMakeExtension('saxpy')],
+    ext_modules=[CMakeExtension('saxpy._saxpy')],
     cmdclass=dict(build_ext=CMakeBuild),
 
     zip_safe=False,
+    packages=['saxpy']
 )
