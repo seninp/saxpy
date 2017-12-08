@@ -5,7 +5,7 @@ matrix:
   - os: linux
     env: PYTHON=2.7
   - os: linux
-    env: PYTHON=3.6
+    env: PYTHON=3.5
   - os: linux
     env: CONDA=2.7
   - os: linux
@@ -26,6 +26,7 @@ before_install:
       brew update; brew install python3;
     fi
     pip install --user --upgrade pip virtualenv
+        pyenv global system 3.5
     virtualenv -p python$PYTHON venv
     source venv/bin/activate
   elif [ -n "$CONDA" ]; then
