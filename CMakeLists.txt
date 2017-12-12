@@ -5,5 +5,5 @@ SET(SOURCE_DIR "src")
 include_directories(${SOURCE_DIR})
 SET(SOURCES "${SOURCE_DIR}/znorm.cpp")
 
-FIND_PACKAGE(pybind11 REQUIRED)
+add_subdirectory(pybind11)
 pybind11_add_module(_saxpy ${SOURCES} "${SOURCE_DIR}/bindings.cpp")
