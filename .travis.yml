@@ -54,7 +54,8 @@ install:
   fi
 
 script:
-  - py.test tests/* --cov=saxpy
+  - coverage run test/test_znorm.py
+  #- py.test tests/* --cov=saxpy
 
 after_success:
   - codecov
