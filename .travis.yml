@@ -44,18 +44,17 @@ before_install:
 install:
 - |
   if [ -n "$PYTHON" ]; then
-    pip install pybind11 numpy pytest codecov pytest-cov
+    pip install pybind11 numpy pytest pytest-cov coveralls
     python setup.py sdist
     pip install --verbose dist/*.tar.gz
   elif [ -n "$CONDA" ]; then
-    conda install numpy pytest codecov pytest-cov
+    conda install numpy pytest pytest-cov coveralls
     conda build conda.recipe
     conda install --use-local saxpy
   fi
 
 script:
-  - coverage run test/test_znorm.py
-  #- py.test tests/* --cov=saxpy
+  py.test --cov saxpy test
 
 after_success:
   - codecov

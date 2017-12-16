@@ -1,11 +1,13 @@
 #include <saxpy.hpp>
+#include <iostream>
 #include <numeric>
 
 std::vector<double> znorm(const std::vector<double> ts, double threshold) {
 
+
     double sum = std::accumulate(std::begin(ts), std::end(ts), 0.0);
     double mean =  sum / ts.size();
-    // Rcout << " mean2 " << mean << "\n";
+    // std::cout << " mean2 " << mean << "\n";
 
     std::vector<double> diff(ts.size());
     std::transform(ts.begin(), ts.end(), diff.begin(), std::bind2nd(std::minus<double>(), mean));
