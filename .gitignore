@@ -8,3 +8,4 @@ _generate/
 *.py[cod]
 *.egg-info
 .coverage
+jupyter/.ipynb*
