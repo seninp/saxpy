@@ -11,5 +11,4 @@ def test_znorm():
 
     x_scaled = [x / 100.0 for x in ts]
 
-    assert pytest.approx(1.0, 0.000001) == \
-        std(znorm.znorm(x_scaled, z_thrsh), axis=0, ddof=1)
+    assert pytest.approx(1.0, 0.000001) == std(znorm.znorm(x_scaled, z_thrsh))

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """building saxpy."""
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 with open('README.rst') as f:
@@ -16,19 +16,17 @@ setup(
     url="https://github.com/seninp/saxpy.git",
     packages=['saxpy'],
 
-    author="Pavel Senin",
-    author_email="senin@hawaii.edu",
-
     description="SAX implementation for Python",
     long_description=open('README.rst').read(),
-
-    install_requires=requirements,
-
     keywords='saxpy',
+
     classifiers=[
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.6',
     ],
+
+    author="Pavel Senin",
+    author_email="senin@hawaii.edu",
 
     license=license
 )

@@ -7,7 +7,7 @@ install: pip install tox-travis
 script: tox
 
 script:
-  py.test --cov saxpy test
+  py.test --cov test
 
 after_success:
   - codecov
