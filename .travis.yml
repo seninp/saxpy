@@ -3,7 +3,7 @@ language: python
 python:
   - "2.7"
   - "3.6"
-install: pip install tox-travis numpy pytest-cov
+install: pip install tox-travis numpy pytest-cov codecov
 
 script:
   tox
