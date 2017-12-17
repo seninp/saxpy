@@ -4,10 +4,9 @@ python:
   - "2.7"
   - "3.6"
 install: pip install tox-travis numpy pytest-cov
-script: tox
 
 script:
-  py.test --cov
+  tox
 
 after_success:
   - codecov
