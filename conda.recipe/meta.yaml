@@ -1,34 +1,29 @@
 package:
   name: saxpy
-  version: {{ environ.get('GIT_DESCRIBE_TAG', 'dev') }}
+  version: 0.1.0
 
 build:
-  number: {{ environ.get('GIT_DESCRIBE_NUMBER', 0) }}
-  {% if environ.get('GIT_DESCRIBE_NUMBER', '0') == '0' %}string: py{{ environ.get('PY_VER').replace('.', '') }}_0
-  {% else %}string: py{{ environ.get('PY_VER').replace('.', '') }}_{{ environ.get('GIT_BUILD_STR', 'GIT_STUB') }}{% endif %}
-  script_env:
-    - CC
-    - CXX
+  # If the installation is complex, or different between Unix and Windows, use
+  # separate bld.bat and build.sh files instead of this key.  Add the line
+  # "skip: True  # [py<35]" (for example) to limit to Python 3.5 and newer, or
+  # "skip: True  # [not win]" to limit to Windows.
+  script: python setup.py install --single-version-externally-managed --record=record.txt
 
 source:
-  git_url: ../
+  path: ..
 
 requirements:
   build:
     - python
     - setuptools
     - numpy
-    - pandas
-    - pybind11
-
   run:
     - python
-    - vs2015_runtime  # [win]
 
 test:
   imports:
     - saxpy
 
 about:
-  summary: An example project built with pybind11.
+  summary: SAX: time series symbolic discretization stack
   license_file: LICENSE

@@ -13,6 +13,3 @@ def test_znorm():
 
     assert pytest.approx(1.0, 0.000001) == \
         std(znorm.znorm(x_scaled, z_thrsh), axis=0, ddof=1)
-
-#    assert pytest.approx(1.0, 0.000001) == \
-#                    np.std(sp.znorm_py(x_scaled, z_thrsh), axis=0, ddof=1)
