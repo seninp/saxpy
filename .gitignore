@@ -3,6 +3,7 @@ build/
 dist/
 _build/
 _generate/
+.cache*
 .tox*
 *.so
 *.py[cod]
