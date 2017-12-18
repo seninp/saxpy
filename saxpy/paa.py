@@ -16,12 +16,14 @@ def paa(series, paa_segments):
             inc = series_len // paa_segments
             for i in range(0, series_len):
                 idx = i // inc
-                res[idx] = res[idx] + series[i]
+                np.add.at(res, idx, series[i])
+                # res[idx] = res[idx] + series[i]
             return res / inc
         # and process when we are odd
         else:
             for i in range(0, paa_segments * series_len):
                 idx = i // series_len
                 pos = i // paa_segments
-                res[idx] = res[idx] + series[pos]
+                np.add.at(res, idx, series[pos])
+                # res[idx] = res[idx] + series[pos]
             return res / series_len
