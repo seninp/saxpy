@@ -2,7 +2,7 @@
 import numpy as np
 
 
-def paa(a_size):
+def cuts_for_asize(a_size):
     """Generate a set of alphabet cuts for its size."""
     options = {
         2: np.array([-np.inf,  0.00]),
@@ -85,4 +85,4 @@ def paa(a_size):
                      1.64485362695147]),
     }
 
-    return options[a_size]()
+    return options[a_size]
