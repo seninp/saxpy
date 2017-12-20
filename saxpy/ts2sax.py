@@ -6,6 +6,4 @@ def series2sax(series, alphabet_cuts):
     """Simple cnversion implementation."""
     series_len = len(series)
     sax = list()
-    
-
     return sax
