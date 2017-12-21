@@ -3,7 +3,7 @@ import numpy as np
 from str import idx2letter
 
 
-def series2sax(series, alphabet_cuts):
+def sax_by_chunking(series, paa_size, alphabet_size=3, z_threshold=0.01):
     """Simple cnversion implementation."""
     series_len = len(series)
     cuts_len = len(alphabet_cuts)

@@ -1,6 +1,6 @@
 """Testing STR functions."""
 import pytest
-from saxpy.str import idx2letter
+from saxpy.string import idx2letter
 
 
 def test_sizing():

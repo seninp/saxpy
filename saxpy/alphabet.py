@@ -4,6 +4,16 @@ import numpy as np
 
 def cuts_for_asize(a_size):
     """Generate a set of alphabet cuts for its size."""
+    """ Typically, we generate cuts in R as follows:
+        get_cuts_for_num <- function(num) {
+        cuts = c(-Inf)
+        for (i in 1:(num-1)) {
+            cuts = c(cuts, qnorm(i * 1/num))
+            }
+            cuts
+        }
+
+        get_cuts_for_num(3) """
     options = {
         2: np.array([-np.inf,  0.00]),
         3: np.array([-np.inf, -0.4307273, 0.4307273]),
