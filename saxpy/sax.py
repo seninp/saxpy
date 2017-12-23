@@ -1,5 +1,4 @@
 """Converts a normlized timeseries to SAX symbols."""
-import numpy as np
 from saxpy.strfunc import idx2letter
 from saxpy.znorm import znorm
 from saxpy.paa import paa
@@ -8,7 +7,6 @@ from saxpy.alphabet import cuts_for_asize
 
 def sax_by_chunking(series, paa_size, alphabet_size=3, z_threshold=0.01):
     """Simple cnversion implementation."""
-
     sax = list()
 
     paa_rep = paa(znorm(series, z_threshold), paa_size)
