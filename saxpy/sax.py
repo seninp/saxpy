@@ -29,4 +29,4 @@ def sax_by_chunking(series, paa_size, alphabet_size=3, z_threshold=0.01):
             while (j < alphabet_size and alphabet_cuts[j] < num):
                 j = j + 1
             sax.append(idx2letter(j-1))
-    return sax
+    return ''.join(sax)
