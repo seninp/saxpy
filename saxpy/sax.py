@@ -6,7 +6,7 @@ from saxpy.alphabet import cuts_for_asize
 
 
 def sax_by_chunking(series, paa_size, alphabet_size=3, z_threshold=0.01):
-    """Simple cnversion implementation."""
+    """Simple chunking conversion implementation."""
     sax = list()
 
     paa_rep = paa(znorm(series, z_threshold), paa_size)
