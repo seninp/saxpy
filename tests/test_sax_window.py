@@ -21,15 +21,23 @@ def test_via_window():
                     0.119483882364649, -0.222311941138971, -0.74669456611669,
                     -0.0663660879732063, 0., 0., 0., 0., 0.])
 
-    sax1 = sax_via_window(dat, 6, 3, 3, "none", 0.01)
+    sax_none = sax_via_window(dat, 6, 3, 3, "none", 0.01)
 
     elements_num = 0
-    for key in sax1:
-        elements_num += len(sax1[key])
+    for key in sax_none:
+        elements_num += len(sax_none[key])
     elements_num
-
     assert len(dat) - 6 == elements_num
 
-    cca = sax1['cca']
-
+    cca = sax_none['cca']
     assert np.array_equal(np.array(cca), np.array([0, 1]))
+
+    sax_exact = sax_via_window(dat, 6, 3, 3, "exact", 0.01)
+    cca = sax_exact['cca']
+    assert np.array_equal(np.array(cca), np.array([0]))
+
+    sax_mindist = sax_via_window(dat, 6, 3, 3, "mindist", 0.01)
+    cca = sax_mindist['cca']
+    bbc = sax_mindist['bbc']
+    assert np.array_equal(np.array(cca), np.array([0]))
+    assert np.array_equal(np.array(bbc), np.array([2]))
