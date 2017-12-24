@@ -6,7 +6,6 @@ from saxpy import znorm
 
 def test_znorm():
     """Test the znorm implementation."""
-
     # test std is 1 and mean is 0
     ts = array([-1., -2., -1., 0., 2., 1., 1., 0.])
     z_thrsh = 0.001
