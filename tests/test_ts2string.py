@@ -17,3 +17,13 @@ def test_stringing():
     kj = sax.ts_to_string(np.array([1.33517773611895, 1.33517773611894]),
                           alphabet.cuts_for_asize(11))
     assert 'kj' == kj
+
+
+def test_mindist():
+    """Test MINDIST."""
+    assert sax.is_mindist_zero('ab', 'ab')
+    assert sax.is_mindist_zero('ab', 'bc')
+    assert sax.is_mindist_zero('abcd', 'bccc')
+
+    assert 0 == sax.is_mindist_zero('ab', 'bd')
+    assert 0 == sax.is_mindist_zero('ab', 'abc')

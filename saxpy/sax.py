@@ -28,6 +28,12 @@ def ts_to_string(series, cuts):
 
 def is_mindist_zero(a, b):
     """Check mindist."""
+    if len(a) != len(b):
+        return 0
+    else:
+        for i in range(0, len(b)):
+            if abs(ord(a[i]) - ord(b[i])) > 1:
+                return 0
     return 1
 
 
