@@ -57,7 +57,7 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
 
     for i in range(0, len(series) - win_size):
 
-        sub_section = series[i, i+win_size, 1]
+        sub_section = series[i:(i+win_size)]
 
         zn = znorm(sub_section, z_threshold)
 
