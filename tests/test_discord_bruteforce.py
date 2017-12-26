@@ -1,5 +1,4 @@
 """Testing PAA implementation."""
-import pytest
 import numpy as np
 from saxpy.discord import find_best_discord_brute_force
 
