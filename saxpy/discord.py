@@ -54,10 +54,11 @@ def find_best_discord_brute_force2(series, win_size):
 
     outerRegistry = VisitRegistry(len(series) - win_size)
 
-    outer_idx = outerRegistry.get_next_unvisited()
+    outer_idx = outerRegistry.get_next_unvisited2()
 
     while ~np.isnan(outer_idx):
 
+        print("outer unvisited: " + str(outerRegistry.get_unvisited_count()))
         outerRegistry.mark_visited(outer_idx)
 
         candidate_seq = series[outer_idx:(outer_idx+win_size)]
@@ -65,9 +66,10 @@ def find_best_discord_brute_force2(series, win_size):
         nnDistance = np.inf
         innerRegistry = VisitRegistry(len(series) - win_size)
 
-        inner_idx = innerRegistry.get_next_unvisited()
+        inner_idx = innerRegistry.get_next_unvisited2()
 
         while ~np.isnan(inner_idx):
+
             innerRegistry.mark_visited(inner_idx)
 
             if abs(inner_idx - outer_idx) > win_size:

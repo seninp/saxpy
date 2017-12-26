@@ -17,7 +17,7 @@ class VisitRegistry:
 
     def mark_visited(self, index):
         """Set a single index as visited."""
-        if 0 == self.visit_array[index]:
+        if (0 == self.visit_array[index]):
             self.visit_array[index] = 1
             self.unvisited_count -= 1
 
@@ -38,11 +38,14 @@ class VisitRegistry:
 
     def get_next_unvisited2(self):
         """Speed-optimized version."""
-        tmp_order = np.zeros(self.unvisited_count, dtype=np.uint8)
-        j = 0
-        for i in range(0, self.capacity):
-            if 0 == self.visit_array[i]:
-                tmp_order[j] = i
-                j += 1
-        np.random.shuffle(tmp_order)
-        return tmp_order[0]
+        if 0 == self.unvisited_count:
+            return np.nan
+        else:
+            tmp_order = np.zeros(self.unvisited_count, dtype=np.int32)
+            j = 0
+            for i in range(0, self.capacity):
+                if 0 == self.visit_array[i]:
+                    tmp_order[j] = i
+                    j += 1
+            np.random.shuffle(tmp_order)
+            return tmp_order[0]
