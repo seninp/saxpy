@@ -36,7 +36,7 @@ class VisitRegistry:
                 i = np.random.randint(0, self.capacity)
             return i
 
-    def get_next_unvisited2(self):
+    '''def get_next_unvisited2(self):
         """Speed-optimized version."""
         if 0 == self.unvisited_count:
             return np.nan
@@ -48,4 +48,4 @@ class VisitRegistry:
                     tmp_order[j] = i
                     j += 1
             np.random.shuffle(tmp_order)
-            return tmp_order[0]
+            return tmp_order[0]'''
