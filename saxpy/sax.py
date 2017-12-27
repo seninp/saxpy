@@ -39,11 +39,8 @@ def is_mindist_zero(a, b):
 
 def sax_by_chunking(series, paa_size, alphabet_size=3, z_threshold=0.01):
     """Simple chunking conversion implementation."""
-
     paa_rep = paa(znorm(series, z_threshold), paa_size)
-
     cuts = cuts_for_asize(alphabet_size)
-
     return ts_to_string(paa_rep, cuts)
 
 

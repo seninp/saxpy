@@ -24,7 +24,7 @@ class VisitRegistry:
     def mark_visited_range(self, start, stop):
         """Set a range as visited."""
         for i in range(start, stop):
-            self.mark_visited[i]
+            self.mark_visited(i)
 
     def get_next_unvisited(self):
         """Memory-optimized version."""
