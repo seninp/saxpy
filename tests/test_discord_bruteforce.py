@@ -1,4 +1,4 @@
-"""Testing PAA implementation."""
+"""Testing brute force discord search implementation."""
 import numpy as np
 from saxpy.discord import find_best_discord_brute_force
 
