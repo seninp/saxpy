@@ -6,7 +6,7 @@ from saxpy.distance import euclidean
 
 
 def find_best_discord_hotsax(series, win_size=100, a_size=3, paa_size=3,
-                             znorm_threshold=0.01):
+                             znorm_threshold=0.01): # noqa: C901
     """Find the best discord with hotsax."""
     """[1.0] get the sax data first"""
     sax_none = sax_via_window(series, win_size, a_size, paa_size, "none", 0.01)

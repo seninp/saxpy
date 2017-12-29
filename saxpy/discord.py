@@ -2,9 +2,10 @@
 import numpy as np
 from saxpy.visit_registry import VisitRegistry
 from saxpy.distance import early_abandoned_dist
+from saxpy.znorm import znorm
 
 
-def find_best_discord_brute_force(series, win_size):
+def find_best_discord_brute_force(series, win_size, z_threshold=0.01):
     """Early-abandoned distance-based discord discovery."""
     best_so_far_distance = -1.0
     best_so_far_index = -1
@@ -17,7 +18,8 @@ def find_best_discord_brute_force(series, win_size):
 
         outerRegistry.mark_visited(outer_idx)
 
-        candidate_seq = series[outer_idx:(outer_idx+win_size)]
+        candidate_seq = znorm(series[outer_idx:(outer_idx+win_size)],
+                              z_threshold)
 
         nnDistance = np.inf
         innerRegistry = VisitRegistry(len(series) - win_size)
@@ -29,16 +31,17 @@ def find_best_discord_brute_force(series, win_size):
 
             if abs(inner_idx - outer_idx) > win_size:
 
-                curr_seq = series[inner_idx:(inner_idx+win_size)]
+                curr_seq = znorm(series[inner_idx:(inner_idx+win_size)],
+                                 z_threshold)
                 dist = early_abandoned_dist(candidate_seq,
                                             curr_seq, nnDistance)
 
-                if ~np.isnan(dist) and (dist < nnDistance):
+                if (~np.isnan(dist)) and (dist < nnDistance):
                     nnDistance = dist
 
             inner_idx = innerRegistry.get_next_unvisited()
 
-        if ~(np.inf == nnDistance) and nnDistance > best_so_far_distance:
+        if ~(np.inf == nnDistance) and (nnDistance > best_so_far_distance):
             best_so_far_distance = nnDistance
             best_so_far_index = outer_idx
 
