@@ -29,7 +29,6 @@ def find_best_discord_brute_force(series, win_size, global_registry,
 
         while ~np.isnan(inner_idx):
             innerRegistry.mark_visited(inner_idx)
-            #print(" inner", innerRegistry.get_unvisited_count())
 
             if abs(inner_idx - outer_idx) > win_size:
 
@@ -68,7 +67,7 @@ def find_discords_brute_force(series, win_size, num_discords=2,
 
         if -1 == bestDiscord[0]:
             break
-        
+
         discords.append(bestDiscord)
 
         mark_start = bestDiscord[0] - win_size
@@ -76,8 +75,8 @@ def find_discords_brute_force(series, win_size, num_discords=2,
             mark_start = 0
 
         mark_end = bestDiscord[0] + win_size
-        if len(series) < mark_end:
-            mark_end = len(series)
+        '''if len(series) < mark_end:
+            mark_end = len(series)'''
 
         globalRegistry.mark_visited_range(mark_start, mark_end)
 
