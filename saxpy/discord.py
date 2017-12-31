@@ -5,12 +5,13 @@ from saxpy.distance import early_abandoned_dist
 from saxpy.znorm import znorm
 
 
-def find_best_discord_brute_force(series, win_size, z_threshold=0.01):
+def find_best_discord_brute_force(series, win_size, global_registry,
+                                  z_threshold=0.01):
     """Early-abandoned distance-based discord discovery."""
     best_so_far_distance = -1.0
     best_so_far_index = -1
 
-    outerRegistry = VisitRegistry(len(series) - win_size)
+    outerRegistry = global_registry.clone()
 
     outer_idx = outerRegistry.get_next_unvisited()
 
@@ -28,6 +29,7 @@ def find_best_discord_brute_force(series, win_size, z_threshold=0.01):
 
         while ~np.isnan(inner_idx):
             innerRegistry.mark_visited(inner_idx)
+            #print(" inner", innerRegistry.get_unvisited_count())
 
             if abs(inner_idx - outer_idx) > win_size:
 
@@ -48,3 +50,35 @@ def find_best_discord_brute_force(series, win_size, z_threshold=0.01):
         outer_idx = outerRegistry.get_next_unvisited()
 
     return (best_so_far_index, best_so_far_distance)
+
+
+def find_discords_brute_force(series, win_size, num_discords=2,
+                              z_threshold=0.01):
+    """Early-abandoned distance-based discord discovery."""
+    discords = list()
+
+    globalRegistry = VisitRegistry(len(series))
+    globalRegistry.mark_visited_range(len(series) - win_size, len(series))
+
+    while (len(discords) < num_discords):
+
+        bestDiscord = find_best_discord_brute_force(series, win_size,
+                                                    globalRegistry,
+                                                    z_threshold)
+
+        if -1 == bestDiscord[0]:
+            break
+        
+        discords.append(bestDiscord)
+
+        mark_start = bestDiscord[0] - win_size
+        if 0 > mark_start:
+            mark_start = 0
+
+        mark_end = bestDiscord[0] + win_size
+        if len(series) < mark_end:
+            mark_end = len(series)
+
+        globalRegistry.mark_visited_range(mark_start, mark_end)
+
+    return discords

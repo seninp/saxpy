@@ -36,6 +36,13 @@ class VisitRegistry:
                 i = np.random.randint(0, self.capacity)
             return i
 
+    def clone(self):
+        """Make the array's copy."""
+        clone = VisitRegistry(self.capacity)
+        setattr(clone, 'visit_array', self.visit_array.copy())
+        setattr(clone, 'unvisited_count', self.unvisited_count)
+        return clone
+
     '''def get_next_unvisited2(self):
         """Speed-optimized version."""
         if 0 == self.unvisited_count:
