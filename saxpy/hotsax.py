@@ -5,8 +5,40 @@ from saxpy.sax import sax_via_window
 from saxpy.distance import euclidean
 
 
-def find_best_discord_hotsax(series, win_size=100, a_size=3, paa_size=3,
-                             znorm_threshold=0.01): # noqa: C901
+def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
+                         paa_size=3, z_threshold=0.01):
+    """HOT-SAX-driven discords discovery."""
+    discords = list()
+
+    globalRegistry = set()
+
+    while (len(discords) < num_discords):
+
+        bestDiscord = find_best_discord_hotsax(series, win_size, a_size,
+                                               paa_size, z_threshold,
+                                               globalRegistry)
+
+        if -1 == bestDiscord[0]:
+            break
+
+        discords.append(bestDiscord)
+
+        mark_start = bestDiscord[0] - win_size
+        if 0 > mark_start:
+            mark_start = 0
+
+        mark_end = bestDiscord[0] + win_size
+        '''if len(series) < mark_end:
+            mark_end = len(series)'''
+
+        for i in range(mark_start, mark_end):
+            globalRegistry.add(i)
+
+    return discords
+
+
+def find_best_discord_hotsax(series, win_size, a_size, paa_size,
+                             znorm_threshold, globalRegistry): # noqa: C901
     """Find the best discord with hotsax."""
     """[1.0] get the sax data first"""
     sax_none = sax_via_window(series, win_size, a_size, paa_size, "none", 0.01)
@@ -38,6 +70,9 @@ def find_best_discord_hotsax(series, win_size=100, a_size=3, paa_size=3,
         nail down the possibly small distance value -- so we can be efficient
         and all that..."""
         for curr_pos in occurrences:
+
+            if curr_pos in globalRegistry:
+                continue
 
             """[7.0] we don't want an overlapping subsequence"""
             mark_start = curr_pos - win_size
