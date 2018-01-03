@@ -18,7 +18,7 @@ Time series symbolic discretization with SAX
 
 
 This code is released under `GPL v.2.0 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html>`_ and implements in Python: 
- * Symbolic Aggregate approXimation (i.e., SAX) toolkit stack [LIN2002] 
+ * Symbolic Aggregate approXimation (i.e., SAX) stack [LIN2002] 
  * a simple function for time series motif discovery [PATEL2001]
  * HOT-SAX - a time series anomaly (discord) discovery algorithm [KEOGH2005]
 
