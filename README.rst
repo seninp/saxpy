@@ -22,7 +22,7 @@ This code is released under `GPL v.2.0 <https://www.gnu.org/licenses/old-license
  * a simple function for time series motif discovery [2]
  * HOT-SAX - a time series anomaly (discord) discovery algorithm [3]
 
-[1] Lin, J., Keogh, E., Patel, P., and Lonardi, S., `*Finding Motifs in
+   [1] Lin, J., Keogh, E., Patel, P., and Lonardi, S., `*Finding Motifs in
 Time Series* <http://cs.gmu.edu/~jessica/Lin_motif.pdf>`__, The 2nd
 Workshop on Temporal Data Mining, the 8th ACM Int'l Conference on KDD
 (2002)
