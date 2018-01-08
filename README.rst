@@ -1,10 +1,9 @@
 Time series symbolic discretization with SAX
 =====
 
-
 .. image:: https://img.shields.io/pypi/v/saxpy.svg
-    :target: https://pypi.python.org/pypi/saxpy
-    :alt: Latest PyPI version
+   :target: https://pypi.python.org/pypi/saxpy
+   :alt: Latest PyPI version
 
 .. image:: https://travis-ci.org/seninp/saxpy.png
    :target: https://travis-ci.org/seninp/saxpy
