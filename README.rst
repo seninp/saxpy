@@ -25,7 +25,7 @@ This code is released under `GPL v.2.0 <https://www.gnu.org/licenses/old-license
 .. [PATEL2001] Patel, P., Keogh, E., Lin, J., Lonardi, S., `*Mining Motifs in Massive Time Series Databases* <http://www.cs.gmu.edu/~jessica/publications/motif_icdm02.pdf>`__, In Proc. ICDM (2002)
 .. [KEOGH2005] Keogh, E., Lin, J., Fu, A., `*HOT SAX: Efficiently finding the most unusual time series subsequence* <http://www.cs.ucr.edu/~eamonn/HOT%20SAX%20%20long-ver.pdf>`__, In Proc. ICDM (2005)
 
-*Note that the most of library's functionality is also available in `R <https://github.com/jMotif/jmotif-R>`__ and `Java <https://github.com/jMotif/SAX>`__*
+*Note that the most of library's functionality is also available in `R <https://github.com/jMotif/jmotif-R>`_ and `Java <https://github.com/jMotif/SAX>`_*
 
 Usage
 -----
