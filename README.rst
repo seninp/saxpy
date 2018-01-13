@@ -33,7 +33,11 @@ Citing this work:
 If you are using this implementation for you academic work, please cite our `Grammarviz 2.0
 paper <http://link.springer.com/chapter/10.1007/978-3-662-44845-8_37>`__:
 
-.. [SENIN2014] Senin, P., Lin, J., Wang, X., Oates, T., Gandhi, S., Boedihardjo, A.P., Chen, C., Frankenstein, S., Lerner, M., `GrammarViz 2.0: a tool for grammar-based pattern discovery in time series <http://csdl.ics.hawaii.edu/techreports/2014/14-06/14-06.pdf>`__, ECML/PKDD Conference, 2014.
+.. [SENIN2014] Senin, P., Lin, J., Wang, X., Oates, T., Gandhi, S., Boedihardjo, A.P., Chen, C., Frankenstein, S., Lerner, M., `GrammarViz 2.0: a tool for grammar-based pattern discovery in time series <http://csdl.ics.hawaii.edu/techreports/2014/14-06/14-06.pdf>`__, ECML/PKDD, 2014.
+
+In a nutshell
+-------------
+SAX is used to transform a sequence of rational numbers (i.e., a time series) into a sequence of letters (i.e., a string) which is (typically) much shorterthan the input time series. Thus, SAX transform addresses a chief problem in time-series analysis -- the dimensionality curse.
 
 Installation
 ------------
