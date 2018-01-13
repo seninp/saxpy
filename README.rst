@@ -16,7 +16,7 @@ Time series symbolic discretization with SAX
    :target: http://www.gnu.org/licenses/gpl-2.0.html
 
 
-This code is released under `GPL v.2.0 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html>`_ and implements in Python:
+This code is released under `GPL v.2.0 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html>`_ and implements in Python: 
  * Symbolic Aggregate approXimation (i.e., SAX) stack [LIN2002]
  * a simple function for time series motif discovery [PATEL2001]
  * HOT-SAX - a time series anomaly (discord) discovery algorithm [KEOGH2005]
@@ -25,11 +25,15 @@ This code is released under `GPL v.2.0 <https://www.gnu.org/licenses/old-license
 .. [PATEL2001] Patel, P., Keogh, E., Lin, J., Lonardi, S., `*Mining Motifs in Massive Time Series Databases* <http://www.cs.gmu.edu/~jessica/publications/motif_icdm02.pdf>`__, In Proc. ICDM (2002)
 .. [KEOGH2005] Keogh, E., Lin, J., Fu, A., `*HOT SAX: Efficiently finding the most unusual time series subsequence* <http://www.cs.ucr.edu/~eamonn/HOT%20SAX%20%20long-ver.pdf>`__, In Proc. ICDM (2005)
 
+Note that the most of the library's functionality is also available in `R <https://github.com/jMotif/jmotif-R>`__ and `Java <https://github.com/jMotif/SAX>`__
 
-*Note that the most of library's functionality is also available in `R <https://github.com/jMotif/jmotif-R>`_ and `Java <https://github.com/jMotif/SAX>`_*
 
-Usage
+Citing this work:
 -----
+If you are using this implementation for you academic work, please cite our `Grammarviz 2.0
+paper <http://link.springer.com/chapter/10.1007/978-3-662-44845-8_37>`__:
+
+.. [SENIN2014] Senin, P., Lin, J., Wang, X., Oates, T., Gandhi, S., Boedihardjo, A.P., Chen, C., Frankenstein, S., Lerner, M., `*GrammarViz 2.0: a tool for grammar-based pattern discovery in time series* <http://csdl.ics.hawaii.edu/techreports/2014/14-06/14-06.pdf>`__, ECML/PKDD Conference, 2014.
 
 Installation
 ------------
