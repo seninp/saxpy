@@ -5,6 +5,8 @@ _build/
 _generate/
 .cache*
 .tox*
+.eggs*
+ChangeLog
 *.so
 *.py[cod]
 *.egg-info
