@@ -11,4 +11,5 @@ ChangeLog
 *.py[cod]
 *.egg-info
 .coverage
+.pypirc
 jupyter/.ipynb*
