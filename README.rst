@@ -1,5 +1,5 @@
 Time series symbolic discretization with SAX
-=====
+=============================================
 
 .. image:: https://img.shields.io/pypi/v/saxpy.svg
    :target: https://pypi.python.org/pypi/saxpy
@@ -16,7 +16,7 @@ Time series symbolic discretization with SAX
    :target: http://www.gnu.org/licenses/gpl-2.0.html
 
 
-This code is released under `GPL v.2.0 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html>`_ and implements in Python: 
+This code is released under `GPL v.2.0 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html>`_ and implements in Python:
  * Symbolic Aggregate approXimation (i.e., SAX) stack [LIN2002]
  * a simple function for time series motif discovery [PATEL2001]
  * HOT-SAX - a time series anomaly (discord) discovery algorithm [KEOGH2005]
@@ -29,14 +29,14 @@ Note that the most of the library's functionality is also available in `R <https
 
 
 Citing this work:
------
+------------------
 If you are using this implementation for you academic work, please cite our `Grammarviz 2.0
 paper <http://link.springer.com/chapter/10.1007/978-3-662-44845-8_37>`__:
 
 .. [SENIN2014] Senin, P., Lin, J., Wang, X., Oates, T., Gandhi, S., Boedihardjo, A.P., Chen, C., Frankenstein, S., Lerner, M., `GrammarViz 2.0: a tool for grammar-based pattern discovery in time series <http://csdl.ics.hawaii.edu/techreports/2014/14-06/14-06.pdf>`__, ECML/PKDD, 2014.
 
 In a nutshell
--------------
+--------------
 SAX is used to transform a sequence of rational numbers (i.e., a time series) into a sequence of letters (i.e., a string) which is (typically) much shorterthan the input time series. Thus, SAX transform addresses a chief problem in time-series analysis -- the dimensionality curse.
 
 This is an illustration of a time series of 128 points converted into the word of 8 letters:
@@ -54,7 +54,7 @@ page <http://www.cs.ucr.edu/~eamonn/SAX.htm>`__, or at `sax-vsm wiki
 page <http://jmotif.github.io/sax-vsm_site/morea/algorithm/SAX.html>`__.
 
 Installation
-------------
+-------------
 
 ::
 
