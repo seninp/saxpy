@@ -56,41 +56,26 @@ The code is written in Python and hosted on PyPi, so use `pip` to install it. Th
 
 
 
-2.0 Time series to SAX conversion using CLI
+2.0 Time series to SAX conversion
 ------------
-The jar file can be used to convert a time series (represented as a single-column text file) to SAX via sliding window in command line:
+To convert a time series of an arbitrary length to SAX we need to define the alphabet cuts. Saxpy retrieves cuts for a normal alphabet (we use size 3 here) via `cuts_for_asize` function:
 
-	$ java -jar target/jmotif-sax-0.1.1-SNAPSHOT-jar-with-dependencies.jar
-	Usage: <main class> [options] 
-  	Options:
-    		--alphabet_size, -a
-    		   SAX alphabet size, Default: 3
-    		--data, -d
-    		   The input file name
-    		--out, -o
-       		   The output file name
-    		--strategy
-       		   SAX numerosity reduction strategy
-       		   Default: EXACT, Possible Values: [NONE, EXACT, MINDIST]
-    		--threads, -t
-       		   number of threads to use, Default: 1
-    		--threshold
-       		   SAX normalization threshold, Default: 0.01
-    		--window_size, -w
-       		   SAX sliding window size, Default: 30
-    		--word_size, -p
-       		   SAX PAA word size, Default: 4
+	from saxpy.alphabet import cuts_for_asize
+	cuts_for_asize(3)
 
-When run, it prints the time series point index and a corresponding word:
+which yields an array:
 
- 	$ java -jar "target/jmotif-sax-1.0.1-SNAPSHOT-jar-with-dependencies.jar" \ 
- 	                      -d src/resources/test-data/ecg0606_1.csv -o test.txt
- 	$ head test.txt
- 	0, aabc
-	8, aacc
-	13, abcc
-	20, abcb
-	...
+	array([      -inf, -0.4307273,  0.4307273])
+
+To convert a time series to letters with SAX we use `ts_to_string` function but not forgetting to z-Normalize the input time series:
+
+	from saxpy.znorm import znorm
+	from saxpy.sax import ts_to_string
+	ts_to_string(znorm(np.array([-2, 0, 2, 0, -1])), cuts_for_asize(3))
+
+this produces a string:
+
+	'abcba'
 
 3.0 API usage
 ------------	
