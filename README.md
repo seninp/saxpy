@@ -1,13 +1,15 @@
 Time series symbolic discretization with SAX
 ====
-[![Build Status](https://travis-ci.org/jMotif/SAX.svg?branch=master)](https://travis-ci.org/jMotif/SAX) [![codecov.io](http://codecov.io/github/jMotif/SAX/coverage.svg?branch=master)](http://codecov.io/github/jMotif/SAX?branch=master) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/net.seninp/jmotif-sax/badge.svg)](https://maven-badges.herokuapp.com/maven-central/net.seninp/jmotif-sax)
-[![License](http://img.shields.io/:license-gpl2-green.svg)](http://www.gnu.org/licenses/gpl-2.0.html)
+[![Latest PyPI version](https://img.shields.io/pypi/v/saxpy.svg)](https://pypi.python.org/pypi/saxpy)
+[![Latest Travis CI build status](https://travis-ci.org/seninp/saxpy.png)](https://travis-ci.org/seninp/saxpy)
+[![image](https://codecov.io/gh/seninp/saxpy/branch/master/graph/badge.svg)](https://codecov.io/gh/seninp/saxpy)
+[![image](http://img.shields.io/:license-gpl2-green.svg)](http://www.gnu.org/licenses/gpl-2.0.html)
 
-This code is released under [GPL v.2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) and implements in Java:
+
+This code is released under [GPL v.2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) and implements in Python:
   * Symbolic Aggregate approXimation (i.e., SAX) toolkit stack [1]
-  * a simple function for time series motif discovery [2]
+  * a function for time series motif discovery (EMMA) [2]
   * HOT-SAX - a time series anomaly (discord) discovery algorithm [3]
-  * time series bitmap-related routines [4]
 
 [1] Lin, J., Keogh, E., Patel, P., and Lonardi, S., 
 [*Finding Motifs in Time Series*](http://cs.gmu.edu/~jessica/Lin_motif.pdf), 
@@ -21,10 +23,9 @@ In Proc. ICDM (2002)
 [*HOT SAX: Efficiently finding the most unusual time series subsequence*](http://www.cs.ucr.edu/~eamonn/HOT%20SAX%20%20long-ver.pdf),
 In Proc. ICDM (2005)
 
-[4] Kumar, N., Lolla, V.N., Keogh, E.J., Lonardi, S. and Chotirat (Ann) Ratanamahatana,
-[Time-series Bitmaps: a Practical Visualization Tool for Working with Large Time Series Databases](http://www.cs.ucr.edu/~eamonn/time_series_bitmaps.pdf), In SDM 2005 Apr 21 (pp. 531-535).
+##### Note that the most of the library's functionality is also available in [R](https://github.com/jMotif/jmotif-R) and
+[Java](https://github.com/jMotif/SAX)
 
-##### _Note that the most of library's functionality is also available in [R](https://github.com/jMotif/jmotif-R)_
 
 #### Citing this work:
 
