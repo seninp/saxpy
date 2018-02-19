@@ -67,7 +67,7 @@ which yields an array:
 
 	array([      -inf, -0.4307273,  0.4307273])
 
-To convert a time series to letters with SAX we use `ts_to_string` function but not forgetting to z-Normalize the input time series:
+To convert a time series to letters with SAX we use `ts_to_string` function but not forgetting to z-normalize the input time series (we use Normal alphabet):
 
 	import numpy as np
 	from saxpy.znorm import znorm
