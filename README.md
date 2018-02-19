@@ -180,8 +180,7 @@ which can be called as follows:
 	
 	[(73, 6.198555329625453), (219, 5.5636923991016136)]
 	
-
-5.0 Time series motif discovery with EMMA
+6.0 Time series motif discovery with EMMA
 ------------
 ToDo...
 
