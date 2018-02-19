@@ -100,8 +100,11 @@ and three-letters string is produced:
 
 4.0 Time series to SAX conversion via sliding window
 ------------
-Typically, in order to investigate the input time series structure in order to discover anomalous (i.e., discords) and recurrent (i.e., motifs) patterns we employ time series to SAX conversion via sliding window. Saxpy implements this workflow as shown below:
-[(73, 6.198555329625453), (219, 5.5636923991016136)]
+Typically, in order to investigate the input time series structure in order to discover anomalous (i.e., discords) and recurrent (i.e., motifs) patterns we employ time series to SAX conversion via sliding window. Saxpy implements this workflow 
+	
+	import numpy as np
+	from saxpy.sax import sax_via_window
+
 	dat = np.array([0., 0., 0., 0., 0., -0.270340178359072, -0.367828308500142,
                 0.666980581124872, 1.87088147328446, 2.14548907684624,
                 -0.480859313143032, -0.72911654245842, -0.490308602315934,
@@ -178,6 +181,9 @@ which can be called as follows:
 	[(73, 6.198555329625453), (219, 5.5636923991016136)]
 	
 
+5.0 Time series motif discovery with EMMA
+------------
+ToDo...
 
 ## Made with Aloha!
 ![Made with Aloha!](https://raw.githubusercontent.com/GrammarViz2/grammarviz2_src/master/src/resources/assets/aloha.jpg)
