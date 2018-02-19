@@ -23,8 +23,7 @@ In Proc. ICDM (2002)
 [*HOT SAX: Efficiently finding the most unusual time series subsequence*](http://www.cs.ucr.edu/~eamonn/HOT%20SAX%20%20long-ver.pdf),
 In Proc. ICDM (2005)
 
-##### Note that the most of the library's functionality is also available in [R](https://github.com/jMotif/jmotif-R) and
-[Java](https://github.com/jMotif/SAX)
+##### Note that the most of the library's functionality is also available in [R](https://github.com/jMotif/jmotif-R) and [Java](https://github.com/jMotif/SAX)
 
 
 #### Citing this work:
@@ -32,9 +31,6 @@ In Proc. ICDM (2005)
 If you are using this implementation for you academic work, please cite our [Grammarviz 2.0 paper](http://link.springer.com/chapter/10.1007/978-3-662-44845-8_37):
 
 [[Citation]](https://raw.githubusercontent.com/jMotif/SAX/master/citation.bib) Senin, P., Lin, J., Wang, X., Oates, T., Gandhi, S., Boedihardjo, A.P., Chen, C., Frankenstein, S., Lerner, M.,  [*GrammarViz 2.0: a tool for grammar-based pattern discovery in time series*](http://csdl.ics.hawaii.edu/techreports/2014/14-06/14-06.pdf), ECML/PKDD Conference, 2014.
-
-#### an alternative solution for recurrent and anomalous patterns detection:
-If you are interested in more advance techniques for time series pattern discovery -- the one which allows to discover recurrent and anomalous patterns of *variable length* -- please check out our new tool called [GrammarViz 2.0](http://grammarviz2.github.io/grammarviz2_site/index.html). Based on symbolic discretization, Grammatical Inference, and algorithmic (i.e., Kolmogorv complexity) this new approach facilitates linear-time variable length motifs discovery and orders of magnitude faster than HOT-SAX discords discovery (but exactness is not guaranteed).
 
 0.0 SAX transform in a nutshell
 ------------
@@ -46,20 +42,19 @@ As discretization is probably the most used transformation in data mining, SAX h
 
 1.0 Building
 ------------
-The code is written in Java and I use maven to build it. Use the profile `single` to build an executable jar containing all the dependencies:
-	
-	$ mvn package -P single
-	
-	[INFO] Scanning for projects...
-	[INFO] ------------------------------------------------------------------------
-	[INFO] Building jmotif-sax
-	[INFO]    task-segment: [package]
-	
+The code is written in Python and hosted on PyPi, so use `pip` to install it. This is what happens in my clean test environment:
+
+	$ pip install saxpy
+	Collecting saxpy
+  	Downloading saxpy-1.0.0.dev154.tar.gz (180kB)
+    	100% |████████████████████████████████| 184kB 778kB/s 
+	Requirement already satisfied: numpy in /home/psenin/anaconda3/lib/python3.6/site-packages (from saxpy)
+	Requirement already satisfied: pytest in /home/psenin/anaconda3/lib/python3.6/site-packages (from saxpy)
 	...
-	
-	[INFO] Building jar: /media/Stock/git/jmotif-sax/target/jmotif-sax-1.0.1-SNAPSHOT-jar-with-dependencies.jar
-	[INFO] ------------------------------------------------------------------------
-	[INFO] BUILD SUCCESSFUL
+	Installing collected packages: coverage, pytest-cov, codecov, saxpy
+	Successfully installed codecov-2.0.15 coverage-4.5.1 pytest-cov-2.5.1 saxpy-1.0.0.dev154
+
+
 
 2.0 Time series to SAX conversion using CLI
 ------------
@@ -202,67 +197,6 @@ The [HOTSAXImplementation](https://github.com/jMotif/SAX/blob/master/src/main/ja
 Note, that the "proper" strategy to use with HOTSAX is `NumerosityReductionStrategy.NONE` but you may try others in order to speed-up the search, exactness however, is not guaranteed.
 
 The library source code has examples (tests) for using these [here](https://github.com/jMotif/SAX/blob/master/src/test/java/net/seninp/jmotif/sax/discord/TestDiscordDiscoveryNONE.java) and [here](https://github.com/jMotif/SAX/blob/master/src/test/java/net/seninp/jmotif/sax/discord/TestDiscordDiscoveryEXACT.java).
-	
-4.0 Time series bitmap
-------------
-The library also implements simple routines to convert a time series to bitmap following [4]. Here is an example of six datasets from the paper:
-![Six "normal" datasets](https://raw.githubusercontent.com/jMotif/SAX/master/src/resources/bitmap/normal_datasets.png)
-
-which were converted into the digram frequencies tables and colored with Jet palette:
-
-![Six "normal" datasets as bitmaps](https://raw.githubusercontent.com/jMotif/SAX/master/src/resources/bitmap/normal_datasets_bitmap.png)
-
-and then clustered (`hc`, `ave`) based on the digram occurrence frequencies (`euclidean`):
-
-![Six "normal" datasets clustered via bitmap](https://raw.githubusercontent.com/jMotif/SAX/master/src/resources/bitmap/normal_datasets_clustering.png)
-
-5.0 Threaded performance
-------------	
-The plot shows the speedup achieved when using the parallelized SAX version on the dataset [`300_signal1.txt`](https://raw.githubusercontent.com/jMotif/SAX/master/src/resources/test-data/300_signal1.txt) of length 536,976 points. Parameters used in the experiment: sliding window size 200, PAA size 11, alphabet size 7, and three different NR strategies.
-
-Note, that for MINDIST numerosity reduction strategy the parallelized code performs NONE-based discretization first and prunes the result second. The difference in performance for 7+ CPUs on the plot below is due to the uneven server load, I guess.
-
-![Performance plot](https://raw.githubusercontent.com/jMotif/SAX/master/src/RCode/performance/profiling.png)
 
 ## Made with Aloha!
 ![Made with Aloha!](https://raw.githubusercontent.com/GrammarViz2/grammarviz2_src/master/src/resources/assets/aloha.jpg)
-
-#### Versions:
-`1.1.2` 
-  * maintenance release -- most of changes in the shingling routines, fitting its API for other projects
-  
-`1.1.1` 
-  * HOTSAX implementation parameters bug fix
-
-`1.1.0` 
-  * zNormalization behavior for a case when SD is less than threshold is changed -- yields zeros
-  * [GrammarViz3.0](https://github.com/GrammarViz2/grammarviz2_src) release
-
-`1.0.10`
-  * shingling/bitmap CLI fixes
-  * SAX via chunking fixes -- proper symbol indexes computed (thanks s-mckay!)
-   
-`1.0.9`
-  * fixed the error with the discord size computation
-  * changed HOTSAX and BRUTEFORCE behavior by adding z-Normalization to the distance computation routine
-   
-`1.0.8`
-  * added shingling
-
-`1.0.7`
-  * logback dependencies removed 
-
-`1.0.5 - 1.0.6`
-  * added discretization approximation error computation for grammarviz3 work
-
-`1.0.4`
-  * fixed SAX transform via sliding window, last window is now added
-
-`1.0.3`
-  * improved PAA performance
-
-`1.0.1 - 1.0.2`
-  * more tests, bug fixes, CI
-
-`0.0.1 - 1.0.0`
-  * cleaning up the old JMotif code and decoupling the SAX code from the rest
