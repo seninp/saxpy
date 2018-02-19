@@ -56,7 +56,7 @@ The code is written in Python and hosted on PyPi, so use `pip` to install it. Th
 
 
 
-2.0 Time series to SAX conversion
+2.0 Simple time series to SAX conversion
 ------------
 To convert a time series of an arbitrary length to SAX we need to define the alphabet cuts. Saxpy retrieves cuts for a normal alphabet (we use size 3 here) via `cuts_for_asize` function:
 
@@ -69,6 +69,7 @@ which yields an array:
 
 To convert a time series to letters with SAX we use `ts_to_string` function but not forgetting to z-Normalize the input time series:
 
+	import numpy as np
 	from saxpy.znorm import znorm
 	from saxpy.sax import ts_to_string
 	ts_to_string(znorm(np.array([-2, 0, 2, 0, -1])), cuts_for_asize(3))
@@ -77,111 +78,106 @@ this produces a string:
 
 	'abcba'
 
-3.0 API usage
-------------	
-There two classes implementing end-to-end workflow for SAX. These are [TSProcessor](https://github.com/jMotif/SAX/blob/master/src/main/java/net/seninp/jmotif/sax/TSProcessor.java) (implements time series-related functions) and [SAXProcessor](https://github.com/jMotif/SAX/blob/master/src/main/java/net/seninp/jmotif/sax/SAXProcessor.java) (implements the discretization). Below are typical use scenarios:
-
-#### 3.1 Discretizing time-series *by chunking*:
-
-	// instantiate classes
-	NormalAlphabet na = new NormalAlphabet();
-	SAXProcessor sp = new SAXProcessor();
+3.0 Time series to SAX conversion with PAA aggregation (i.e., by "chunking")
+------------
+In order to reduce dimensionality further, the PAA (Piecewise Aggregate Approximation) is usually applied prior to SAX:
 	
-	// read the input file
-	double[] ts = TSProcessor.readFileColumn(dataFName, 0, 0);
+	import numpy as np
+	from saxpy.znorm import znorm
+	from saxpy.paa import paa
+	from saxpy.sax import ts_to_string
 	
-	// perform the discretization
-	String str = sp.ts2saxByChunking(ts, paaSize, na.getCuts(alphabetSize), nThreshold);
-
-	// print the output
-	System.out.println(str);
-
-#### 3.2 Discretizing time-series *via sliding window*:
-
-	// instantiate classes
-	NormalAlphabet na = new NormalAlphabet();
-	SAXProcessor sp = new SAXProcessor();
+	dat = np.array([-2, 0, 2, 0, -1])
+	dat_znorm = znorm(dat)
+	dat_paa_3 = paa(dat_znorm, 3)
 	
-	// read the input file
-	double[] ts = TSProcessor.readFileColumn(dataFName, 0, 0);
+	ts_to_string(dat_paa_3, cuts_for_asize(3))
+
+and three-letters string is produced:
+
+	'acb'
+
+
+4.0 Time series to SAX conversion via sliding window
+------------
+Typically, in order to investigate the input time series structure in order to discover anomalous (i.e., discords) and recurrent (i.e., motifs) patterns we employ time series to SAX conversion via sliding window. Saxpy implements this workflow as shown below:
+[(73, 6.198555329625453), (219, 5.5636923991016136)]
+	dat = np.array([0., 0., 0., 0., 0., -0.270340178359072, -0.367828308500142,
+                0.666980581124872, 1.87088147328446, 2.14548907684624,
+                -0.480859313143032, -0.72911654245842, -0.490308602315934,
+                -0.66152028906509, -0.221049033806403, 0.367003418871239,
+                0.631073992586373, 0.0487728723414486, 0.762655178750436,
+                0.78574757843331, 0.338239686422963, 0.784206454089066,
+                -2.14265084073625, 2.11325193044223, 0.186018356196443,
+                0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.519132472499234,
+                -2.604783141655, -0.244519550114012, -1.6570790528784,
+                3.34184602886343, 2.10361226260999, 1.9796808733979,
+                -0.822247322003058, 1.06850578033292, -0.678811824405992,
+                0.804225748913681, 0.57363964388698, 0.437113583759113,
+                0.437208643628268, 0.989892093383503, 1.76545983424176,
+                0.119483882364649, -0.222311941138971, -0.74669456611669,
+                -0.0663660879732063, 0., 0., 0., 0., 0.,])
+
+	sax1 = sax_via_window(dat, 6, 3, 3, "none", 0.01)
 	
-	// perform the discretization
-	SAXRecords res = sp.ts2saxViaWindow(ts, slidingWindowSize, paaSize, 
-		na.getCuts(alphabetSize), nrStrategy, nThreshold);
+	sax1
 
-	// print the output
-	Set<Integer> index = res.getIndexes();
-	for (Integer idx : index) {
-		System.out.println(idx + ", " + String.valueOf(res.getByIndex(idx).getPayload()));
-	}
+the result is represented as a data structure of resulting words and their respective positions on time series:
 
-#### 3.3 Multi-threaded discretization *via sliding window*:
+	defaultdict(list,
+            {'aac': [4, 10, 11, 30, 35],
+             'abc': [12, 14, 36, 44],
+             'acb': [5, 16, 21, 37, 43],
+             'acc': [13, 52, 53],
+             'bac': [3, 19, 34, 45, 51],
+             'bba': [31],
+             'bbb': [15, 18, 20, 22, 25, 26, 27, 28, 29, 41, 42, 46],
+             'bbc': [2],
+             'bca': [6, 17, 32, 38, 47, 48],
+             'caa': [8, 23, 24, 40],
+             'cab': [9, 50],
+             'cba': [7, 39, 49],
+             'cbb': [33],
+             'cca': [0, 1]})
 
-	// instantiate classes
-	NormalAlphabet na = new NormalAlphabet();
-	SAXProcessor sp = new SAXProcessor();
-  
-	// read the input file
-	double[] ts = TSProcessor.readFileColumn(dataFName, 0, 0);
+`sax_via_window` is parameterised with a sliding window size, desired PAA aggregation, alphabet size, z-normalization threshold, and a numerosity reduction strategy as follows: 
 
-	// perform the discretization using 8 threads
-	ParallelSAXImplementation ps = new ParallelSAXImplementation();
-	SAXRecords res = ps.process(ts, 8, slidingWindowSize, paaSize, alphabetSize, 
-		nrStrategy, nThreshold);
+	def sax_via_window(series, win_size, paa_size, alphabet_size=3,
+                   nr_strategy='exact', z_threshold=0.01)
 
-	// print the output
-	Set<Integer> index = res.getIndexes();
-	for (Integer idx : index) {
-		System.out.println(idx + ", " + String.valueOf(res.getByIndex(idx).getPayload()));
-	}
 
-#### 3.4 Time series motif (recurrent pattern) discovery
-Class [SAXRecords](https://github.com/jMotif/SAX/blob/master/src/main/java/net/seninp/jmotif/sax/datastructure/SAXRecords.java) implements a method for getting the most frequent SAX words:
-
-        // read the data
-	double[] series = TSProcessor.readFileColumn(DATA_FNAME, 0, 0);
+5.0 Time series discord discovery with HOT-SAX
+------------
+Saxpy implements HOT-SAX discord discovery algorithm in `find_discords_hotsax` function which can be used as follows:
 	
-	// instantiate classes
-	Alphabet na = new NormalAlphabet();
-	SAXProcessor sp = new SAXProcessor();
+	import numpy as np
+	from saxpy.hotsax import find_discords_hotsax
+	from numpy import genfromtxt
+	dd = genfromtxt("data/ecg0606_1.csv", delimiter=',')  
+	discords = find_discords_hotsax(dd)
+	discords
+
+and discovers anomalies easily:
+
+	[(430, 5.2790800061718386), (318, 4.1757563573086953)]
+
+The function has a similar parameterization: sliding window size, PAA and alphabet sizes, z-normalization threshold, and a parameter specifying how many discords are desired to be found:
+
+	def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
+                         paa_size=3, z_threshold=0.01)
+
+Saxpy also provides a brute-force implementation of the discord search if you'd like to verify discords or evaluate the speed-up:
+
+	def find_best_discord_brute_force(series, win_size, global_registry,
+                                  z_threshold=0.01)
+which can be called as follows:
+
+	discords = find_discords_brute_force(dd[100:500], 100, 4)
+	discords
 	
-	// perform discretization
-	saxData = sp.ts2saxViaWindow(series, WIN_SIZE, PAA_SIZE, na.getCuts(ALPHABET_SIZE),
-        		NR_STRATEGY, NORM_THRESHOLD);
-        		
-        // get the list of 10 most frequent SAX words
-	ArrayList<SAXRecord> motifs = saxData.getMotifs(10);
-	SAXRecord topMotif = motifs.get(0);
-        
-        // print motifs
-	System.out.println("top motif " + String.valueOf(topMotif.getPayload()) + " seen " + 
-    	   		topMotif.getIndexes().size() + " times.");
+	[(73, 6.198555329625453), (219, 5.5636923991016136)]
+	
 
-#### 3.5 Time series anomaly detection using brute-force search
-
-The [BruteForceDiscordImplementation](https://github.com/jMotif/SAX/blob/master/src/main/java/net/seninp/jmotif/sax/discord/BruteForceDiscordImplementation.java) class implements a brute-force search for discords, which is intended to be used as a reference in tests (HOTSAX and NONE yield exactly the same discords).
-
- 	discordsBruteForce = BruteForceDiscordImplementation.series2BruteForceDiscords(series, 
- 	   WIN_SIZE, DISCORDS_TO_TEST, new LargeWindowAlgorithm());
-        
-        for (DiscordRecord d : discordsBruteForce) {
-           System.out.println("brute force discord " + d.toString());
-        }
-
-#### 3.6 Time series anomaly (discord) discovery using HOTSAX
-
-The [HOTSAXImplementation](https://github.com/jMotif/SAX/blob/master/src/main/java/net/seninp/jmotif/sax/discord/HOTSAXImplementation.java) class implements a HOTSAX algorithm for time series discord discovery:
-
-      discordsHOTSAX = HOTSAXImplementation.series2Discords(series, DISCORDS_TO_TEST, WIN_SIZE,
-          PAA_SIZE, ALPHABET_SIZE, STRATEGY, NORM_THRESHOLD);
-          
-      for (DiscordRecord d : discordsHOTSAX) {
-        System.out.println("hotsax hash discord " + d.toString());
-      }
-
-Note, that the "proper" strategy to use with HOTSAX is `NumerosityReductionStrategy.NONE` but you may try others in order to speed-up the search, exactness however, is not guaranteed.
-
-The library source code has examples (tests) for using these [here](https://github.com/jMotif/SAX/blob/master/src/test/java/net/seninp/jmotif/sax/discord/TestDiscordDiscoveryNONE.java) and [here](https://github.com/jMotif/SAX/blob/master/src/test/java/net/seninp/jmotif/sax/discord/TestDiscordDiscoveryEXACT.java).
 
 ## Made with Aloha!
 ![Made with Aloha!](https://raw.githubusercontent.com/GrammarViz2/grammarviz2_src/master/src/resources/assets/aloha.jpg)
