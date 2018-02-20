@@ -171,8 +171,8 @@ The function has a similar parameterization: sliding window size, PAA and alphab
 
 Saxpy also provides a brute-force implementation of the discord search if you'd like to verify discords or evaluate the speed-up:
 
-	def find_best_discord_brute_force(series, win_size, global_registry,
-                                  z_threshold=0.01)
+	find_discords_brute_force(series, win_size, num_discords=2,
+                              z_threshold=0.01)
 which can be called as follows:
 
 	discords = find_discords_brute_force(dd[100:500], 100, 4)
