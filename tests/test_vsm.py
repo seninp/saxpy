@@ -2,6 +2,7 @@
 import numpy as np
 from saxpy.sax import sax_via_window
 from saxpy.saxvsm import series_to_wordbag
+from saxpy.saxvsm import manyseries_to_wordbag
 
 
 def test_series_to_wordbag():
@@ -24,6 +25,8 @@ def test_series_to_wordbag():
 
     sax_none = sax_via_window(dat, 6, 3, 3, "none", 0.01)
     wordbag = series_to_wordbag(dat, 6, 3, 3, "none", 0.01)
+    wordbag2 = manyseries_to_wordbag(np.matrix([dat, dat]),
+                                     6, 3, 3, "none", 0.01)
 
     frequencies = {}
     for k, v in sax_none.items():
@@ -31,3 +34,6 @@ def test_series_to_wordbag():
 
     for k, v in wordbag.items():
         assert v == frequencies[k]
+
+    for k, v in wordbag2.items():
+        assert v == frequencies[k] * 2
