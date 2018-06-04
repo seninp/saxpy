@@ -3,6 +3,7 @@ import numpy as np
 from saxpy.sax import sax_via_window
 from saxpy.saxvsm import series_to_wordbag
 from saxpy.saxvsm import manyseries_to_wordbag
+from saxpy.saxvsm import bags_to_tfidf
 
 
 def test_series_to_wordbag():
@@ -38,3 +39,20 @@ def test_series_to_wordbag():
 
     for k, v in wordbag2.items():
         assert v == frequencies[k] * 2
+
+
+def test_vsm():
+    """Test TF*IDF"""
+    bag1 = {"this": 10, "is": 1, "a": 2, "sample": 1}
+    bag2 = {"this": 10, "is": 1, "another": 2, "example": 3}
+    bags = {"bag1": bag1, "bag2": bag2}
+
+    res = bags_to_tfidf(bags)
+
+    example = np.log(1. + 3.) * np.log(2. / 1.)
+    bag2_idx = res["classes"].index("bag2")
+    assert res["vectors"]["example"][bag2_idx] == example
+
+    a = np.log(1. + 2.) * np.log(2. / 1.)
+    bag1_idx = res["classes"].index("bag1")
+    assert res["vectors"]["a"][bag1_idx] == a

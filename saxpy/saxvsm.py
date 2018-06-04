@@ -39,15 +39,15 @@ def bags_to_tfidf(bags_dict):
 
     # classes
     count_size = len(bags_dict)
-    classes = bags_dict.keys()
+    classes = [*bags_dict.copy()]
 
     # word occurrence frequency counts
     counts = {}
 
     # compute frequencies
     idx = 0
-    for name, bag in bags_dict.items():
-        for word, count in bag.items():
+    for name in classes:
+        for word, count in bags_dict[name].items():
             if word in counts:
                 counts[word][idx] = count
             else:
