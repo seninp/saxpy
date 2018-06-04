@@ -24,6 +24,7 @@ def test_series_to_wordbag():
                     -0.0663660879732063, 0., 0., 0., 0., 0.])
 
     sax_none = sax_via_window(dat, 6, 3, 3, "none", 0.01)
+
     wordbag = series_to_wordbag(dat, 6, 3, 3, "none", 0.01)
     wordbag2 = manyseries_to_wordbag(np.matrix([dat, dat]),
                                      6, 3, 3, "none", 0.01)
