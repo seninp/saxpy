@@ -56,3 +56,6 @@ def test_vsm():
     a = np.log(1. + 2.) * np.log(2. / 1.)
     bag1_idx = res["classes"].index("bag1")
     assert res["vectors"]["a"][bag1_idx] == a
+
+
+def test_cosine():
