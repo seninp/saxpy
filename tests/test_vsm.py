@@ -58,4 +58,4 @@ def test_vsm():
     assert res["vectors"]["a"][bag1_idx] == a
 
 
-def test_cosine():
+#def test_cosine():
