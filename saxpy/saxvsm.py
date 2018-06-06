@@ -100,7 +100,7 @@ def tfidf_to_vector(tfidf, vector_label):
         return []
 
 
-def cosine_similarity(weight_vec, test_bag):
+def cosine_measure(weight_vec, test_bag):
     """VSM implementation."""
     sumxx, sumxy, sumyy = 0, 0, 0
     for word in set([*weight_vec.copy()]).union([*test_bag.copy()]):
@@ -109,8 +109,21 @@ def cosine_similarity(weight_vec, test_bag):
             x = weight_vec[word]
         if word in test_bag.keys():
             y = test_bag[word]
-        sumxx += x*x
-        sumyy += y*y
-        sumxy += x*y
+        sumxx += x * x
+        sumyy += y * y
+        sumxy += x * y
+    return sumxy / math.sqrt(sumxx * sumyy)
 
-    return 1. - sumxy/math.sqrt(sumxx*sumyy)
+
+def cosine_similarity(tfidf, test_bag):
+    """VSM implementation."""
+    res = {}
+    for cls in tfidf['classes']:
+        res[cls] = 1. - cosine_measure(tfidf_to_vector(tfidf, cls), test_bag)
+
+    return res
+
+
+def class_for_bag(similarity_dict):
+    # do i need to take care about equal values?
+    return max(similarity_dict, key=lambda x: similarity_dict[x])
