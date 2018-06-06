@@ -1,4 +1,5 @@
 """Implements VSM."""
+import math
 import numpy as np
 from saxpy.sax import sax_via_window
 
@@ -85,3 +86,31 @@ def bags_to_tfidf(bags_dict):
         idx = idx + 1
 
     return {"vectors": tfidf, "classes": classes}
+
+
+def tfidf_to_vector(tfidf, vector_label):
+    """VSM implementation."""
+    if vector_label in tfidf['classes']:
+        idx = tfidf['classes'].index(vector_label)
+        weight_vec = {}
+        for word, weights in tfidf['vectors'].items():
+            weight_vec[word] = weights[idx]
+        return weight_vec
+    else:
+        return []
+
+
+def cosine_similarity(weight_vec, test_bag):
+    """VSM implementation."""
+    sumxx, sumxy, sumyy = 0, 0, 0
+    for word in set([*weight_vec.copy()]).union([*test_bag.copy()]):
+        x, y = 0, 0
+        if word in weight_vec.keys():
+            x = weight_vec[word]
+        if word in test_bag.keys():
+            y = test_bag[word]
+        sumxx += x*x
+        sumyy += y*y
+        sumxy += x*y
+
+    return 1. - sumxy/math.sqrt(sumxx*sumyy)
