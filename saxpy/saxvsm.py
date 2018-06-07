@@ -126,4 +126,4 @@ def cosine_similarity(tfidf, test_bag):
 
 def class_for_bag(similarity_dict):
     # do i need to take care about equal values?
-    return max(similarity_dict, key=lambda x: similarity_dict[x])
+    return min(similarity_dict, key=lambda x: similarity_dict[x])
