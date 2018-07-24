@@ -43,7 +43,7 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
     all_znorms = znorms(series, win_size, znorm_threshold)
     """Find the best discord with hotsax."""
     """[1.0] get the sax data first"""
-    sax_none = sax_via_window(series, win_size, a_size, paa_size, "none", 0.01)
+    sax_none = sax_via_window(series, all_znorms, win_size, paa_size, a_size, "none")
 
     """[2.0] build the 'magic' array"""
     magic_array = list()

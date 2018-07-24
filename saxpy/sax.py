@@ -44,8 +44,8 @@ def sax_by_chunking(series, paa_size, alphabet_size=3, z_threshold=0.01):
     return ts_to_string(paa_rep, cuts)
 
 
-def sax_via_window(series, win_size, paa_size, alphabet_size=3,
-                   nr_strategy='exact', z_threshold=0.01):
+def sax_via_window(series, all_znorms, win_size, paa_size, alphabet_size=3,
+                   nr_strategy='exact'):
     """Simple via window conversion implementation."""
     cuts = cuts_for_asize(alphabet_size)
     sax = defaultdict(list)
@@ -54,9 +54,7 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
 
     for i in range(0, len(series) - win_size):
 
-        sub_section = series[i:(i+win_size)]
-
-        zn = znorm(sub_section, z_threshold)
+        zn = all_znorms[i]
 
         paa_rep = paa(zn, paa_size)
 
