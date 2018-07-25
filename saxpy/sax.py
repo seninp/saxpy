@@ -1,4 +1,6 @@
 """Converts a normlized timeseries to SAX symbols."""
+import numpy as np
+
 from collections import defaultdict
 from saxpy.strfunc import idx2letter
 from saxpy.znorm import znorm
@@ -52,12 +54,18 @@ def sax_via_window(series, all_znorms, win_size, paa_size, alphabet_size=3,
 
     prev_word = ''
 
+    all_paa_reps = np.apply_along_axis(
+        paa,
+        axis=1,
+        arr=all_znorms,
+        paa_segments=paa_size,
+    )
     for i in range(0, len(series) - win_size):
 
         zn = all_znorms[i]
 
-        paa_rep = paa(zn, paa_size)
-
+        # paa_rep = paa(zn, paa_size)
+        paa_rep = all_paa_reps[i]
         curr_word = ts_to_string(paa_rep, cuts)
 
         if '' != prev_word:
