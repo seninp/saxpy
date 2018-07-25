@@ -62,8 +62,10 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
     visit_array = np.zeros(len(series), dtype=np.int)
 
     """[4.0] and we are off iterating over the magic array entries"""
-    for entry in m_arr:
-
+    # m_arr is sorted in reverse order of frequency.  We drop the last entry,
+    # since in a regular signal, this will be the most typical PAA string, and
+    # probably won't contain anomalies.
+    for entry in m_arr[:-1]:
         """[5.0] some moar of teh vars"""
         curr_word = entry[0]
         occurrences = sax_none[curr_word]
@@ -125,6 +127,8 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
                 curr_idx -= 1
 
                 """[15.0] and go random"""
+                ctr = 0
+                max_tries = 2000
                 while curr_idx >= 0:
                     rand_pos = it_order[curr_idx]
                     curr_idx -= 1
@@ -139,6 +143,9 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
                         nn_dist = dist
                     if dist < bestSoFarDistance:
                         nn_dist = dist
+                        break
+                    ctr += 1
+                    if ctr > max_tries:
                         break
 
             """[17.0] and BIGGER books"""
