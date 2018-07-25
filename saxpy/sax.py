@@ -1,4 +1,6 @@
 """Converts a normlized timeseries to SAX symbols."""
+import numpy as np
+
 from collections import defaultdict
 from saxpy.strfunc import idx2letter
 from saxpy.znorm import znorm
@@ -44,22 +46,26 @@ def sax_by_chunking(series, paa_size, alphabet_size=3, z_threshold=0.01):
     return ts_to_string(paa_rep, cuts)
 
 
-def sax_via_window(series, win_size, paa_size, alphabet_size=3,
-                   nr_strategy='exact', z_threshold=0.01):
+def sax_via_window(series, all_znorms, win_size, paa_size, alphabet_size=3,
+                   nr_strategy='exact'):
     """Simple via window conversion implementation."""
     cuts = cuts_for_asize(alphabet_size)
     sax = defaultdict(list)
 
     prev_word = ''
 
+    all_paa_reps = np.apply_along_axis(
+        paa,
+        axis=1,
+        arr=all_znorms,
+        paa_segments=paa_size,
+    )
     for i in range(0, len(series) - win_size):
 
-        sub_section = series[i:(i+win_size)]
+        zn = all_znorms[i]
 
-        zn = znorm(sub_section, z_threshold)
-
-        paa_rep = paa(zn, paa_size)
-
+        # paa_rep = paa(zn, paa_size)
+        paa_rep = all_paa_reps[i]
         curr_word = ts_to_string(paa_rep, cuts)
 
         if '' != prev_word:

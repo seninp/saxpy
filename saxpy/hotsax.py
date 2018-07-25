@@ -1,6 +1,6 @@
 """Implements HOT-SAX."""
 import numpy as np
-from saxpy.znorm import znorm
+from saxpy.znorm import znorm, znorms
 from saxpy.sax import sax_via_window
 from saxpy.distance import euclidean
 
@@ -39,9 +39,11 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
 
 def find_best_discord_hotsax(series, win_size, a_size, paa_size,
                              znorm_threshold, globalRegistry): # noqa: C901
+    # comput all znorms ahead of time
+    all_znorms = znorms(series, win_size, znorm_threshold)
     """Find the best discord with hotsax."""
     """[1.0] get the sax data first"""
-    sax_none = sax_via_window(series, win_size, a_size, paa_size, "none", 0.01)
+    sax_none = sax_via_window(series, all_znorms, win_size, paa_size, a_size, "none")
 
     """[2.0] build the 'magic' array"""
     magic_array = list()
@@ -60,8 +62,10 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
     visit_array = np.zeros(len(series), dtype=np.int)
 
     """[4.0] and we are off iterating over the magic array entries"""
-    for entry in m_arr:
-
+    # m_arr is sorted in reverse order of frequency.  We drop the last entry,
+    # since in a regular signal, this will be the most typical PAA string, and
+    # probably won't contain anomalies.
+    for entry in m_arr[:-1]:
         """[5.0] some moar of teh vars"""
         curr_word = entry[0]
         occurrences = sax_none[curr_word]
@@ -80,8 +84,9 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
             visit_set = set(range(mark_start, mark_end))
 
             """[8.0] here is our subsequence in question"""
-            cur_seq = znorm(series[curr_pos:(curr_pos + win_size)],
-                            znorm_threshold)
+            cur_seq = all_znorms[curr_pos]
+            # cur_seq = znorm(series[curr_pos:(curr_pos + win_size)],
+            #                 znorm_threshold)
 
             """[9.0] let's see what is NN distance"""
             nn_dist = np.inf
@@ -97,8 +102,9 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
                     visit_set.add(next_pos)
 
                 """[12.0] distance we compute"""
-                dist = euclidean(cur_seq, znorm(series[next_pos:(
-                                 next_pos+win_size)], znorm_threshold))
+                dist = euclidean(cur_seq, all_znorms[next_pos])
+                # dist = euclidean(cur_seq, znorm(series[next_pos:(
+                #                  next_pos+win_size)], znorm_threshold))
                 distanceCalls += 1
 
                 """[13.0] keep the books up-to-date"""
@@ -121,12 +127,15 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
                 curr_idx -= 1
 
                 """[15.0] and go random"""
+                ctr = 0
+                max_tries = 2000
                 while curr_idx >= 0:
                     rand_pos = it_order[curr_idx]
                     curr_idx -= 1
 
-                    dist = euclidean(cur_seq, znorm(series[rand_pos:(
-                                     rand_pos + win_size)], znorm_threshold))
+                    dist = euclidean(cur_seq, all_znorms[rand_pos])
+                    # dist = euclidean(cur_seq, znorm(series[rand_pos:(
+                    #                  rand_pos + win_size)], znorm_threshold))
                     distanceCalls += 1
 
                     """[16.0] keep the books up-to-date again"""
@@ -134,6 +143,9 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
                         nn_dist = dist
                     if dist < bestSoFarDistance:
                         nn_dist = dist
+                        break
+                    ctr += 1
+                    if ctr > max_tries:
                         break
 
             """[17.0] and BIGGER books"""
