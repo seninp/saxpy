@@ -37,11 +37,10 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
     return discords
 
 
-def find_best_discord_hotsax(series, win_size, a_size, paa_size,
-                             znorm_threshold, globalRegistry): # noqa: C901
+def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_threshold, globalRegistry):
     """Find the best discord with hotsax."""
     """[1.0] get the sax data first"""
-    sax_none = sax_via_window(series, win_size=win_size, paa_size=paa_size, a_size=a_size, nr_strategy="none", znorm_threshold=0.01)
+    sax_none = sax_via_window(series, win_size=win_size, paa_size=paa_size, alphabet_size=alphabet_size, nr_strategy="none", znorm_threshold=0.01)
 
     """[2.0] build the 'magic' array"""
     magic_array = list()
