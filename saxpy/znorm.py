@@ -22,14 +22,17 @@ def l2norm(array):
 def znorm(series, znorm_threshold=0.01):
     """Znorm implementation.
 
-    >>> print ['{:0.2f}'.format(x) for x in znorm(np.array([1, 2, 3]))]
+    >>> print ['{:0.2f}'.format(x) for x in znorm([1, 2, 3])]
     ['-1.22', '0.00', '1.22']
-    >>> print ['{:0.2f}'.format(x) for x in znorm(np.array([3, 2, 1]))]
+    >>> print ['{:0.2f}'.format(x) for x in znorm([3, 2, 1])]
     ['1.22', '0.00', '-1.22']
-    >>> print ['{:0.2f}'.format(x) for x in znorm(np.array([1, 2]))]
+    >>> print ['{:0.2f}'.format(x) for x in znorm([1, 2])]
     ['-1.00', '1.00']
-    >>> print ['{:0.2f}'.format(x) for x in np.sum(znorm(np.array([[1, 2, 3], [6, 5, 4]])), axis=0)]
+    >>> print ['{:0.2f}'.format(x) for x in np.sum(znorm([[1, 2, 3], [6, 5, 4]]), axis=0)]
     ['0.00', '0.00', '0.00']
+    >>> znorm([[1, 2, 3], [6, 5, 4]])
+    array([[-1., -1., -1.],
+           [ 1.,  1.,  1.]])
     """
 
     series = np.array(series)
@@ -37,15 +40,14 @@ def znorm(series, znorm_threshold=0.01):
     mu = np.average(series, axis=0)
     C = np.cov(series, bias=True, rowvar=not multidim)
 
-    if len(C.shape) == 0:
-        C = np.array([[C]])
-
-    if np.any(np.diagonal(C) < np.square(znorm_threshold)):
-        return series
-
     if multidim:
-        return np.dot(inv(sqrtm(np.matrix(C))), (series - mu).T).T
+        C = np.diagonal(C)
     else:
-        return np.multiply(inv(sqrtm(np.matrix(C))), (series - mu)).flatten()
+        C = np.array([C])
+
+    if np.any(C < np.square(znorm_threshold)):
+        return series
+    else:
+        return (series - mu) / np.sqrt(C)
 
 
