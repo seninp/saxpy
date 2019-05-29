@@ -32,8 +32,8 @@ def znorm(series, znorm_threshold=0.01):
     >>> print ['{:0.2f}'.format(x) for x in np.sum(znorm([[1, 2, 3], [6, 5, 4]]), axis=0)]
     ['0.00', '0.00', '0.00']
     >>> znorm([[1, 2, 3], [6, 5, 4]])
-    array([[-1., -1., -1.],
-           [ 1.,  1.,  1.]])
+    array([[-1, -1, -1],
+           [ 1,  1,  1]])
     """
 
     series = np.array(series)
@@ -41,14 +41,15 @@ def znorm(series, znorm_threshold=0.01):
     mu = np.average(series, axis=0)
     C = np.cov(series, bias=True, rowvar=not multidim)
 
+    # Only update those subsequences with variance over the threshold.
     if multidim:
         C = np.diagonal(C)
+        indexes = (C >= np.square(znorm_threshold))
+        series[:, indexes] = ((series - mu) / np.sqrt(C))[:, indexes]
     else:
-        C = np.array([C])
+        if C >= np.square(znorm_threshold):
+            series = (series - mu) / np.sqrt(C)
 
-    # Only update those subsequences with variance over the threshold.
-    indexes = (C >= np.square(znorm_threshold))
-    series[indexes] = ((series - mu) / np.sqrt(C))[indexes]
     return series
 
 
