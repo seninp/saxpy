@@ -12,21 +12,45 @@ def ts_to_string(series, cuts):
     series = np.array(series)
     a_size = len(cuts)
     sax = list()
-    for i in range(series.shape[0]):
-        num = series[i]
 
-        # If the number is below 0, start from the bottom, otherwise from the top
-        if num >= 0:
-            j = a_size - 1
-            while (j > 0) and (cuts[j] >= num):
-                j = j - 1
-            sax.append(idx2letter(j))
-        else:
-            j = 1
-            while j < a_size and cuts[j] <= num:
-                j = j + 1
-            sax.append(idx2letter(j-1))
-    return ''.join(sax)
+    if len(series.shape) == 1:
+
+        for i in range(series.shape[0]):
+            num = series[i]
+
+            # If the number is below 0, start from the bottom, otherwise from the top
+            if num >= 0:
+                j = a_size - 1
+                while j > 0 and cuts[j] >= num:
+                    j = j - 1
+                sax.append(idx2letter(j))
+            else:
+                j = 1
+                while j < a_size and cuts[j] <= num:
+                    j = j + 1
+                sax.append(idx2letter(j-1))
+        return ''.join(sax)
+
+    elif len(series.shape) == 2:
+        for j in range(series.shape[1]):
+            for i in range(series.shape[0]):
+                num = series[i][j]
+
+                # If the number is below 0, start from the bottom, otherwise from the top
+                if num >= 0:
+                    j = a_size - 1
+                    while j > 0 and cuts[j] >= num:
+                        j = j - 1
+                    sax.append(idx2letter(j))
+                else:
+                    j = 1
+                    while j < a_size and cuts[j] <= num:
+                        j = j + 1
+                    sax.append(idx2letter(j - 1))
+
+        return ''.join(sax)
+    else:
+        raise ValueError('Invalid shape of passed series.')
 
 
 def is_mindist_zero(a, b):
@@ -48,15 +72,19 @@ def sax_by_chunking(series, paa_size, alphabet_size=3, znorm_threshold=0.01):
 
 
 def sax_via_window(series, win_size, paa_size, alphabet_size=3,
-                   nr_strategy='exact', znorm_threshold=0.01):
+                   nr_strategy='exact', znorm_threshold=0.01, sax_type='unidim'):
     """Simple via window conversion implementation."""
 
     # Convert to numpy array.
     series = np.array(series)
 
-    cuts = cuts_for_asize(alphabet_size)
-    sax = defaultdict(list)
+    # Check on dimensions.
+    assert(len(series.shape) <= 2)
 
+    # Breakpoints.
+    cuts = cuts_for_asize(alphabet_size)
+
+    sax = defaultdict(list)
     prev_word = ''
 
     # Sliding window across time dimension.
@@ -69,10 +97,8 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
         zn = znorm(sub_section, znorm_threshold)
 
         # PAA representation of subsection.
-        paa_rep = paa(zn, paa_size)
+        paa_rep = paa(zn, paa_size, sax_type)
 
-        assert(len(paa_rep.shape) == 1)
-        
         # SAX representation of subsection.
         curr_word = ts_to_string(paa_rep, cuts)
 
