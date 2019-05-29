@@ -6,21 +6,24 @@ from saxpy.paa import paa
 from saxpy.alphabet import cuts_for_asize
 import numpy as np
 
+
 def ts_to_string(series, cuts):
     """A straightforward num-to-string conversion."""
+    series = np.array(series)
     a_size = len(cuts)
     sax = list()
-    for i in range(0, len(series)):
+    for i in range(series.shape[0]):
         num = series[i]
-        # if teh number below 0, start from the bottom, or else from the top
-        if(num >= 0):
+
+        # If the number is below 0, start from the bottom, otherwise from the top
+        if num >= 0:
             j = a_size - 1
-            while ((j > 0) and (cuts[j] >= num)):
+            while (j > 0) and (cuts[j] >= num):
                 j = j - 1
             sax.append(idx2letter(j))
         else:
             j = 1
-            while (j < a_size and cuts[j] <= num):
+            while j < a_size and cuts[j] <= num:
                 j = j + 1
             sax.append(idx2letter(j-1))
     return ''.join(sax)
@@ -58,20 +61,25 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
 
     # Sliding window across time dimension.
     for i in range(0, series.shape[0] - win_size):
-        
+
+        # Subsection starting at this index.
         sub_section = series[i: i + win_size]
 
+        # Z-normalized subsection.
         zn = znorm(sub_section, znorm_threshold)
 
+        # PAA representation of subsection.
         paa_rep = paa(zn, paa_size)
 
+        assert(len(paa_rep.shape) == 1)
+        
+        # SAX representation of subsection.
         curr_word = ts_to_string(paa_rep, cuts)
 
         if '' != prev_word:
             if 'exact' == nr_strategy and prev_word == curr_word:
                 continue
-            elif 'mindist' == nr_strategy and\
-                    is_mindist_zero(prev_word, curr_word):
+            elif 'mindist' == nr_strategy and is_mindist_zero(prev_word, curr_word):
                 continue
 
         prev_word = curr_word
