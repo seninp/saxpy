@@ -16,7 +16,7 @@ def paa(series, paa_segment_size):
         inc = series_len // paa_segment_size
         for i in range(0, series_len):
             idx = i // inc
-            np.add.at(res, idx, l2norm(series[i]))
+            np.add.at(res, idx, np.mean(series[i]))
             # res[idx] = res[idx] + ||series[i]||
         return res / inc
     # Process otherwise
@@ -24,6 +24,6 @@ def paa(series, paa_segment_size):
         for i in range(0, paa_segment_size * series_len):
             idx = i // series_len
             pos = i // paa_segment_size
-            np.add.at(res, idx, l2norm(series[pos]))
+            np.add.at(res, idx, np.mean(series[pos]))
             # res[idx] = res[idx] + ||series[pos]||
         return res / series_len
