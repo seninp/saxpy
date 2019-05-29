@@ -5,8 +5,8 @@ from saxpy.sax import sax_via_window
 from saxpy.distance import euclidean
 
 
-def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
-                         paa_size=3, z_threshold=0.01):
+def find_discords_hotsax(series, win_size=100, num_discords=2, alphabet_size=3,
+                         paa_size=3, znorm_threshold=0.01, sax_type='unidim'):
     """HOT-SAX-driven discords discovery."""
     discords = list()
 
@@ -14,9 +14,9 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
 
     while (len(discords) < num_discords):
 
-        bestDiscord = find_best_discord_hotsax(series, win_size, a_size,
-                                               paa_size, z_threshold,
-                                               globalRegistry)
+        bestDiscord = find_best_discord_hotsax(series, win_size, alphabet_size,
+                                               paa_size, znorm_threshold,
+                                               globalRegistry, sax_type)
 
         if -1 == bestDiscord[0]:
             break
@@ -37,10 +37,10 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
     return discords
 
 
-def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_threshold, globalRegistry):
+def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_threshold, globalRegistry, sax_type):
     """Find the best discord with hotsax."""
     """[1.0] get the sax data first"""
-    sax_none = sax_via_window(series, win_size=win_size, paa_size=paa_size, alphabet_size=alphabet_size, nr_strategy="none", znorm_threshold=0.01)
+    sax_none = sax_via_window(series, win_size=win_size, paa_size=paa_size, alphabet_size=alphabet_size, nr_strategy="none", znorm_threshold=0.01, sax_type)
 
     """[2.0] build the 'magic' array"""
     magic_array = list()
