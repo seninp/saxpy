@@ -37,12 +37,12 @@ def znorm(series, znorm_threshold=0.01):
     """
 
     series = np.array(series)
-    multidim = (len(series.shape) > 1)
+    is_multidimensional = (len(series.shape) > 1) and (series.shape[1] > 1)
     mu = np.average(series, axis=0)
-    C = np.cov(series, bias=True, rowvar=not multidim)
+    C = np.cov(series, bias=True, rowvar=not is_multidimensional)
 
     # Only update those subsequences with variance over the threshold.
-    if multidim:
+    if is_multidimensional:
         C = np.diagonal(C)
         indexes = (C >= np.square(znorm_threshold))
         series[:, indexes] = ((series - mu) / np.sqrt(C))[:, indexes]
