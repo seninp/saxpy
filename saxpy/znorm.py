@@ -3,6 +3,7 @@ import numpy as np
 from scipy.linalg import sqrtm
 from scipy.linalg import inv
 
+
 def l2norm(array):
     """
     :param array: numpy array
@@ -45,9 +46,9 @@ def znorm(series, znorm_threshold=0.01):
     else:
         C = np.array([C])
 
-    if np.any(C < np.square(znorm_threshold)):
-        return series
-    else:
-        return (series - mu) / np.sqrt(C)
+    # Only update those subsequences with variance over the threshold.
+    indexes = (C >= np.square(znorm_threshold))
+    series[indexes] = ((series - mu) / np.sqrt(C))[indexes]
+    return series
 
 
