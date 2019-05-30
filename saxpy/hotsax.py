@@ -85,7 +85,7 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
 
             """[9.0] let's see what is NN distance"""
             nn_dist = np.inf
-            do_random_search = 1
+            do_random_search = True
 
             """[10.0] ordered by occurrences search first"""
             for next_pos in occurrences:
@@ -97,15 +97,14 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
                     visit_set.add(next_pos)
 
                 """[12.0] distance we compute"""
-                dist = euclidean(cur_seq, znorm(series[next_pos:(
-                                 next_pos+win_size)], znorm_threshold))
+                dist = euclidean(cur_seq, znorm(series[next_pos:(next_pos + win_size)], znorm_threshold))
                 distanceCalls += 1
 
                 """[13.0] keep the books up-to-date"""
                 if dist < nn_dist:
                     nn_dist = dist
                 if dist < bestSoFarDistance:
-                    do_random_search = 0
+                    do_random_search = False
                     break
 
             """[13.0] if not broken above,
@@ -125,8 +124,7 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
                     rand_pos = it_order[curr_idx]
                     curr_idx -= 1
 
-                    dist = euclidean(cur_seq, znorm(series[rand_pos:(
-                                     rand_pos + win_size)], znorm_threshold))
+                    dist = euclidean(cur_seq, znorm(series[rand_pos:(rand_pos + win_size)], znorm_threshold))
                     distanceCalls += 1
 
                     """[16.0] keep the books up-to-date again"""
