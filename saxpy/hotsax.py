@@ -62,7 +62,7 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
     """[4.0] and we are off iterating over the magic array entries"""
     for entry in m_arr:
 
-        """[5.0] some moar of teh vars"""
+        """[5.0] current SAX words and the number of other sequences mapping to the same SAX word."""
         curr_word = entry[0]
         occurrences = sax_none[curr_word]
 
@@ -112,7 +112,7 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
             if do_random_search:
                 """[14.0] build that random visit order array"""
                 curr_idx = 0
-                for i in range(0, (len(series) - win_size)):
+                for i in range(0, (len(series) - win_size + 1)):
                     if not(i in visit_set):
                         visit_array[curr_idx] = i
                         curr_idx += 1
