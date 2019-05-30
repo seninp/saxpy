@@ -13,7 +13,7 @@ def find_best_discord_brute_force(series, win_size, global_registry,
 
     outerRegistry = global_registry.clone()
 
-    outer_idx = outerRegistry.get_next_unvisited()
+    outer_idx = outerRegistry.get_next_unvisited(len(series) - win_size + 1)
 
     while ~np.isnan(outer_idx):
 
@@ -25,7 +25,7 @@ def find_best_discord_brute_force(series, win_size, global_registry,
         nnDistance = np.inf
         innerRegistry = VisitRegistry(len(series) - win_size)
 
-        inner_idx = innerRegistry.get_next_unvisited()
+        inner_idx = innerRegistry.get_next_unvisited(len(series) - win_size + 1)
 
         while ~np.isnan(inner_idx):
             innerRegistry.mark_visited(inner_idx)
@@ -40,13 +40,13 @@ def find_best_discord_brute_force(series, win_size, global_registry,
                 if (~np.isnan(dist)) and (dist < nnDistance):
                     nnDistance = dist
 
-            inner_idx = innerRegistry.get_next_unvisited()
+            inner_idx = innerRegistry.get_next_unvisited(len(series) - win_size + 1)
 
         if ~(np.inf == nnDistance) and (nnDistance > best_so_far_distance):
             best_so_far_distance = nnDistance
             best_so_far_index = outer_idx
 
-        outer_idx = outerRegistry.get_next_unvisited()
+        outer_idx = outerRegistry.get_next_unvisited(len(series) - win_size + 1)
 
     return (best_so_far_index, best_so_far_distance)
 
@@ -57,7 +57,7 @@ def find_discords_brute_force(series, win_size, num_discords=2,
     discords = list()
 
     globalRegistry = VisitRegistry(len(series))
-    globalRegistry.mark_visited_range(len(series) - win_size, len(series))
+    # globalRegistry.mark_visited_range(len(series) - win_size, len(series))
 
     while len(discords) < num_discords:
 

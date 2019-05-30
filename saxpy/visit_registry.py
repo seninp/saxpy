@@ -26,14 +26,15 @@ class VisitRegistry:
         for i in range(start, stop):
             self.mark_visited(i)
 
-    def get_next_unvisited(self):
+    def get_next_unvisited(self, max_range=np.inf):
         """Memory-optimized version."""
         if 0 == self.unvisited_count:
             return np.nan
         else:
-            i = np.random.randint(0, self.capacity)
+            actual_range = min(max_range, self.capacity)
+            i = np.random.randint(0, actual_range)
             while 1 == self.visit_array[i]:
-                i = np.random.randint(0, self.capacity)
+                i = np.random.randint(0, actual_range)
             return i
 
     def clone(self):
