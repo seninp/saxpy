@@ -99,13 +99,20 @@ def sax_by_chunking(series, paa_size, alphabet_size=3, znorm_threshold=0.01):
 
 def sax_via_window(series, win_size, paa_size, alphabet_size=3,
                    nr_strategy='exact', znorm_threshold=0.01, sax_type='unidim'):
-    """Simple via window conversion implementation."""
+    """Simple via window conversion implementation.
+
+    >>> sax_via_window([[1, 2, 3], [4, 5, 6]], win_size=1, paa_size=1, sax_type='energy', nr_strategy=None)['abc']
+    [0, 1]
+    """
 
     # Convert to numpy array.
     series = np.array(series)
 
     # Check on dimensions.
     assert(len(series.shape) <= 2)
+
+    if sax_type == 'energy' and len(series.shape) == 1:
+        raise ValueError('Must pass a multidimensional time-series to SAX-ENERGY.')
 
     # Breakpoints.
     cuts = cuts_for_asize(alphabet_size)
@@ -114,19 +121,33 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
     prev_word = ''
 
     # Sliding window across time dimension.
-    for i in range(0, series.shape[0] - win_size):
+    for i in range(series.shape[0] - win_size + 1):
 
         # Subsection starting at this index.
         sub_section = series[i: i + win_size]
 
-        # Z-normalized subsection.
-        zn = znorm(sub_section, znorm_threshold)
+        if sax_type == 'energy':
+            curr_word = ''
+            for energy_dist in sub_section:
+                # Normalize energy distribution.
+                energy_zn = znorm(energy_dist, znorm_threshold)
 
-        # PAA representation of subsection.
-        paa_rep = paa(zn, paa_size, sax_type)
+                # SAX representation of the energy distribution.
+                # No PAA step because we have only 63 counts.
+                energy_word = ts_to_string(energy_zn, cuts, 'unidim')
 
-        # SAX representation of subsection.
-        curr_word = ts_to_string(paa_rep, cuts, sax_type)
+                # Add to current word.
+                curr_word += energy_word
+
+        else:
+            # Z-normalized subsection.
+            zn = znorm(sub_section, znorm_threshold)
+
+            # PAA representation of subsection.
+            paa_rep = paa(zn, paa_size, sax_type)
+
+            # SAX representation of subsection.
+            curr_word = ts_to_string(paa_rep, cuts, sax_type)
 
         if '' != prev_word:
             if 'exact' == nr_strategy and prev_word == curr_word:
