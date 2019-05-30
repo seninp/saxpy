@@ -37,6 +37,7 @@ def znorm(series, znorm_threshold=0.01):
     """
 
     series = np.array(series)
+    original_series_shape = series.shape
     is_multidimensional = (len(series.shape) > 1) and (series.shape[1] > 1)
     mu = np.average(series, axis=0)
     C = np.cov(series, bias=True, rowvar=not is_multidimensional)
@@ -49,6 +50,9 @@ def znorm(series, znorm_threshold=0.01):
     else:
         if C >= np.square(znorm_threshold):
             series = (series - mu) / np.sqrt(C)
+
+    # Check on shape returned.
+    assert(series.shape == original_series_shape)
 
     return series
 
