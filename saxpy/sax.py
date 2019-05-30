@@ -123,7 +123,7 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
     prev_word = ''
 
     # Sliding window across time dimension.
-    for i in range(series.shape[0] - win_size):
+    for i in range(series.shape[0] - win_size + 1):
 
         # Subsection starting at this index.
         sub_section = series[i: i + win_size]
