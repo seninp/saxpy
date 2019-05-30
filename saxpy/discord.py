@@ -1,7 +1,7 @@
 """Discord discovery routines."""
 import numpy as np
 from saxpy.visit_registry import VisitRegistry
-from saxpy.distance import early_abandoned_dist
+from saxpy.distance import early_abandoned_euclidean
 from saxpy.znorm import znorm
 
 
@@ -34,7 +34,7 @@ def find_best_discord_brute_force(series, win_size, global_registry,
 
                 curr_seq = znorm(series[inner_idx:(inner_idx+win_size)],
                                  z_threshold)
-                dist = early_abandoned_dist(candidate_seq,
+                dist = early_abandoned_euclidean(candidate_seq,
                                             curr_seq, nnDistance)
 
                 if (~np.isnan(dist)) and (dist < nnDistance):
@@ -59,7 +59,7 @@ def find_discords_brute_force(series, win_size, num_discords=2,
     globalRegistry = VisitRegistry(len(series))
     globalRegistry.mark_visited_range(len(series) - win_size, len(series))
 
-    while (len(discords) < num_discords):
+    while len(discords) < num_discords:
 
         bestDiscord = find_best_discord_brute_force(series, win_size,
                                                     globalRegistry,
