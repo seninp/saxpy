@@ -26,7 +26,10 @@ class VisitRegistry:
             self.mark_visited(i)
 
     def get_next_unvisited(self):
-        """Memory-optimized version."""
+        """Next unvisited entry."""
+        if self.get_unvisited_count() == 0:
+            return np.nan
+
         return random.choice(tuple(self.remaining))
 
     def clone(self):
