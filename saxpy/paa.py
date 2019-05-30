@@ -4,7 +4,7 @@ import numpy as np
 from znorm import l2norm
 
 
-def paa(series, paa_segment_size, sax_type):
+def paa(series, paa_segment_size, sax_type='unidim'):
     """PAA implementation."""
     series = np.array(series)
     series_len = series.shape[0]

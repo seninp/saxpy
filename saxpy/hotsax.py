@@ -39,6 +39,7 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, alphabet_size=3,
 
 def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_threshold, globalRegistry, sax_type):
     """Find the best discord with hotsax."""
+
     """[1.0] get the sax data first"""
     sax_none = sax_via_window(series, win_size=win_size, paa_size=paa_size, alphabet_size=alphabet_size, nr_strategy="none", znorm_threshold=0.01, sax_type=sax_type)
 

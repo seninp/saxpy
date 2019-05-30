@@ -46,6 +46,8 @@ def ts_to_string(series, cuts, sax_type='unidim'):
         # List of all the multidimensional words.
         multidim_sax_list = np.array(multidim_sax_list)
 
+        print 'Clustering %d multi-dimensional letters into %d clusters for final SAX letters...' % (multidim_sax_list.shape[0], a_size)
+
         # Cluster with k-means++.
         kmeans = KMeans(n_clusters=a_size, random_state=0).fit(multidim_sax_list)
 
@@ -55,6 +57,8 @@ def ts_to_string(series, cuts, sax_type='unidim'):
         # Map cluster indices to new SAX letters.
         sax = map(lambda cluster_index: idx2letter(order[cluster_index]), kmeans.predict(multidim_sax_list))
 
+        print 'Mapping complete.'
+        
         return ''.join(sax)
 
     else:
