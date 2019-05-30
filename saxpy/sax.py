@@ -24,8 +24,10 @@ def ts_to_string(series, cuts, sax_type='unidim'):
 
     if sax_type == 'repeat':
         multidim_sax_list = []
+
         for i in range(series.shape[0]):
             multidim_sax = []
+
             for j in range(series.shape[1]):
                 num = series[i][j]
 
