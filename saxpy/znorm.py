@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.linalg import sqrtm
 from scipy.linalg import inv
+from __future__ import division
 
 
 def l2norm(array):
