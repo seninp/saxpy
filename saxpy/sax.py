@@ -5,16 +5,59 @@ from saxpy.znorm import znorm
 from saxpy.paa import paa
 from saxpy.alphabet import cuts_for_asize
 import numpy as np
+from sklearn.cluster import KMeans
 
 
-def ts_to_string(series, cuts):
-    """A straightforward num-to-string conversion."""
+def ts_to_string(series, cuts, sax_type='unidim'):
+    """A straightforward num-to-string conversion.
+
+    >>> ts_to_string([[1, 2, -3], [4, 9, -2], [5, 7, -8], [0, 3, -1], [-1, -2, -10]], cuts_for_asize(3), 'repeat')
+    'cccba'
+
+    >>> ts_to_string([-1, 0, 1], cuts_for_asize(3))
+    'abc'
+    """
+
     series = np.array(series)
     a_size = len(cuts)
     sax = list()
 
-    if len(series.shape) == 1:
+    if sax_type == 'repeat':
+        multidim_sax_list = []
+        for i in range(series.shape[0]):
+            multidim_sax = []
+            for j in range(series.shape[1]):
+                num = series[i][j]
 
+                # If the number is below 0, start from the bottom, otherwise from the top
+                if num >= 0:
+                    j = a_size - 1
+                    while j > 0 and cuts[j] >= num:
+                        j = j - 1
+                    multidim_sax.append(j)
+                else:
+                    j = 1
+                    while j < a_size and cuts[j] <= num:
+                        j = j + 1
+                    multidim_sax.append(j - 1)
+
+            multidim_sax_list.append(multidim_sax)
+
+        # List of all the multidimensional words.
+        multidim_sax_list = np.array(multidim_sax_list)
+
+        # Cluster with k-means++.
+        kmeans = KMeans(n_clusters=a_size, random_state=0).fit(multidim_sax_list)
+
+        # Cluster indices in sorted order.
+        order = np.lexsort(np.rot90(kmeans.cluster_centers_))
+
+        # Map cluster indices to new SAX letters.
+        sax = map(lambda cluster_index: idx2letter(order[cluster_index]), kmeans.predict(multidim_sax_list))
+
+        return ''.join(sax)
+
+    else:
         for i in range(series.shape[0]):
             num = series[i]
 
@@ -30,27 +73,6 @@ def ts_to_string(series, cuts):
                     j = j + 1
                 sax.append(idx2letter(j-1))
         return ''.join(sax)
-
-    elif len(series.shape) == 2:
-        for j in range(series.shape[1]):
-            for i in range(series.shape[0]):
-                num = series[i][j]
-
-                # If the number is below 0, start from the bottom, otherwise from the top
-                if num >= 0:
-                    j = a_size - 1
-                    while j > 0 and cuts[j] >= num:
-                        j = j - 1
-                    sax.append(idx2letter(j))
-                else:
-                    j = 1
-                    while j < a_size and cuts[j] <= num:
-                        j = j + 1
-                    sax.append(idx2letter(j - 1))
-
-        return ''.join(sax)
-    else:
-        raise ValueError('Invalid shape of passed series.')
 
 
 def is_mindist_zero(a, b):
@@ -100,7 +122,7 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
         paa_rep = paa(zn, paa_size, sax_type)
 
         # SAX representation of subsection.
-        curr_word = ts_to_string(paa_rep, cuts)
+        curr_word = ts_to_string(paa_rep, cuts, sax_type)
 
         if '' != prev_word:
             if 'exact' == nr_strategy and prev_word == curr_word:
