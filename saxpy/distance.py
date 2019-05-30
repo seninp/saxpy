@@ -13,6 +13,6 @@ def early_abandoned_dist(a, b, upper_limit):
     res = 0.
     for i in range(0, len(a)):
         res += (a[i]-b[i])*(a[i]-b[i])
-        if res > lim:
+        if np.any(res > lim):
             return np.nan
     return np.sqrt(res)
