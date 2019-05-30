@@ -30,7 +30,7 @@ def find_best_discord_brute_force(series, win_size, global_registry,
         while ~np.isnan(inner_idx):
             innerRegistry.mark_visited(inner_idx)
 
-            if abs(inner_idx - outer_idx) > win_size:
+            if abs(inner_idx - outer_idx) >= win_size:
 
                 curr_seq = znorm(series[inner_idx:(inner_idx+win_size)],
                                  z_threshold)

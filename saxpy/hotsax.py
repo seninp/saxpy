@@ -75,7 +75,7 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
                 continue
 
             """[7.0] we don't want an overlapping subsequence"""
-            mark_start = curr_pos - win_size
+            mark_start = curr_pos - win_size + 1
             mark_end = curr_pos + win_size
             visit_set = set(range(mark_start, mark_end))
 
@@ -99,6 +99,9 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
                 """[12.0] distance we compute"""
                 dist = euclidean(cur_seq, znorm(series[next_pos:(next_pos + win_size)], znorm_threshold))
                 distanceCalls += 1
+
+                if curr_pos in [80] or next_pos in [80]:
+                    print 'outer_idx = %d, inner_idx = %d, dist = %0.3f' % (curr_pos, next_pos, dist)
 
                 """[13.0] keep the books up-to-date"""
                 if dist < nn_dist:
@@ -140,3 +143,4 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
                 bestSoFarPosition = curr_pos
 
     return (bestSoFarPosition, bestSoFarDistance)
+
