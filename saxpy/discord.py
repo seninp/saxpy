@@ -23,7 +23,7 @@ def find_best_discord_brute_force(series, win_size, global_registry,
                               z_threshold)
 
         nnDistance = np.inf
-        innerRegistry = VisitRegistry()
+        innerRegistry = VisitRegistry(len(series) - win_size + 1)
 
         inner_idx = innerRegistry.get_next_unvisited()
 
