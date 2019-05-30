@@ -31,4 +31,6 @@ class VisitRegistry:
 
     def clone(self):
         """Make the array's copy."""
-        return self.remaining.copy()
+        clone = VisitRegistry()
+        clone.remaining = self.remaining.copy()
+        return clone
