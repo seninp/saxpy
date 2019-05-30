@@ -7,7 +7,7 @@ def euclidean(a, b):
     return np.sqrt(np.sum((a-b)**2))
 
 
-def early_abandoned_dist(a, b, upper_limit):
+def early_abandoned_euclidean(a, b, upper_limit):
     """Compute a Euclidean distance value in early abandoning fashion."""
     lim = upper_limit * upper_limit
     res = 0.
