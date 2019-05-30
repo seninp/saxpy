@@ -33,6 +33,6 @@ def paa(series, paa_segment_size, sax_type='unidim'):
             res[dim] /= series_len
 
     if sax_type == 'repeat':
-        return res
+        return res.T
     else:
         return res.flatten()
