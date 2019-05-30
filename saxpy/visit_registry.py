@@ -6,7 +6,7 @@ import random
 class VisitRegistry:
     """A straightforward visit array implementation."""
 
-    def __init__(self, capacity):
+    def __init__(self, capacity=0):
         """Constructor."""
         self.remaining = set()
         for num in range(capacity):
