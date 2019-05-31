@@ -151,7 +151,7 @@ the result is represented as a data structure of resulting words and their respe
              'cbb': [33],
              'cca': [0, 1]})
 
-`sax_via_window` is parameterised with a sliding window size, desired PAA aggregation, alphabet size, a numerosity reduction strategy, z-normalization threshold, and a SAX type ('unidim' for unidimensional SAX (default), 'znorm' for SAX-ZSCORE, 'repeat' for SAX-REPEAT): 
+`sax_via_window` is parameterised with a sliding window size, desired PAA aggregation, alphabet size, a numerosity reduction strategy, z-normalization threshold, and a SAX type ('unidim' for unidimensional SAX (default), 'zscore' for SAX-ZSCORE, 'repeat' for SAX-REPEAT): 
 
 	def sax_via_window(series, win_size, paa_size, alphabet_size=3,
                    nr_strategy='exact', z_threshold=0.01, sax_type='unidim')
