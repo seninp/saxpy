@@ -100,9 +100,6 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
                 dist = euclidean(cur_seq, znorm(series[next_pos:(next_pos + win_size)], znorm_threshold))
                 distanceCalls += 1
 
-                if curr_pos in [80] or next_pos in [80]:
-                    print 'outer_idx = %d, inner_idx = %d, dist = %0.3f' % (curr_pos, next_pos, dist)
-
                 """[13.0] keep the books up-to-date"""
                 if dist < nn_dist:
                     nn_dist = dist
