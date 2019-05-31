@@ -1,7 +1,6 @@
 """Implements PAA."""
 from __future__ import division
 import numpy as np
-from znorm import l2norm
 
 
 def paa(series, paa_segment_size, sax_type='unidim'):
