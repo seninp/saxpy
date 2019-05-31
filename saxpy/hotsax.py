@@ -23,13 +23,8 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, alphabet_size=3,
 
         discords.append(bestDiscord)
 
-        mark_start = bestDiscord[0] - win_size
-        if 0 > mark_start:
-            mark_start = 0
-
+        mark_start = max(0, bestDiscord[0] - win_size + 1)
         mark_end = bestDiscord[0] + win_size
-        '''if len(series) < mark_end:
-            mark_end = len(series)'''
 
         for i in range(mark_start, mark_end):
             globalRegistry.add(i)
