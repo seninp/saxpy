@@ -46,12 +46,14 @@ def znorm(series, znorm_threshold=0.01):
 
     # Only update those subsequences with variance over the threshold.
     if is_multidimensional:
+        series = series - mu
         C = np.diagonal(C)
         indexes = (C >= np.square(znorm_threshold))
-        series[:, indexes] = ((series - mu) / np.sqrt(C))[:, indexes]
+        series[:, indexes] = (series / np.sqrt(C))[:, indexes]
     else:
+        series = series - mu
         if C >= np.square(znorm_threshold):
-            series = (series - mu) / np.sqrt(C)
+            series /= np.sqrt(C)
 
     # Check on shape returned.
     assert(series.shape == original_series_shape)
