@@ -34,8 +34,8 @@ def znorm(series, znorm_threshold=0.01):
     >>> print ['{:0.2f}'.format(x) for x in np.sum(znorm([[1, 2, 3], [6, 5, 4]]), axis=0)]
     ['0.00', '0.00', '0.00']
     >>> znorm([[1, 2, 3], [6, 5, 4]])
-    array([[-1, -1, -1],
-           [ 1,  1,  1]])
+    array([[-1., -1., -1.],
+           [ 1.,  1.,  1.]])
     """
 
     series = np.array(series)
