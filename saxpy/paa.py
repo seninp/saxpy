@@ -15,6 +15,9 @@ def paa(series, paa_segment_size, sax_type='unidim'):
     array([5.])
     >>> paa([[1, 2, 3], [6, 5, 4]], 1, 'repeat')
     array([[3.5, 3.5, 3.5]])
+    >>> paa([[1, 2, 3], [6, 5, 4]], 2, 'repeat')
+    array([[1., 2., 3.],
+           [6., 5., 4.]])
     """
 
     series = np.array(series)
