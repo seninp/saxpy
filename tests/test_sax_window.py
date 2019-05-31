@@ -21,13 +21,12 @@ def test_via_window():
                     0.119483882364649, -0.222311941138971, -0.74669456611669,
                     -0.0663660879732063, 0., 0., 0., 0., 0.])
 
-    sax_none = sax_via_window(dat, 6, 3, 3, "none", 0.01)
+    sax_none = sax_via_window(dat, win_size=6, paa_size=3, alphabet_size=3, nr_strategy=None, znorm_threshold=0.01)
 
     elements_num = 0
     for key in sax_none:
         elements_num += len(sax_none[key])
-    elements_num
-    assert len(dat) - 6 == elements_num
+    assert len(dat) - 6 + 1 == elements_num
 
     cca = sax_none['cca']
     assert np.array_equal(np.array(cca), np.array([0, 1]))
