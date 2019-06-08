@@ -120,6 +120,12 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
     >>> sax_via_window([[1, 2], [4, 5], [7, 8]], win_size=2, paa_size=2, sax_type='independent', nr_strategy=None)['acac']
     [0, 1]
 
+    >>> sax_via_window([[1, 2], [4, 8], [7, 5]], win_size=2, paa_size=2, sax_type='independent', nr_strategy=None)['acac']
+    [0]
+
+    >>> sax_via_window([[1, 2], [4, 8], [7, 5]], win_size=2, paa_size=2, sax_type='independent', nr_strategy=None)['acca']
+    [1]
+
     """
 
     # Convert to numpy array.
@@ -219,9 +225,11 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
             elif sax_type == 'independent':
                 curr_word = ''
                 for dim in range(sub_section.shape[1]):
-                    one_dimension_subsequence = sub_section[:, i]
+                    # Obtain the subsequence restricted to one dimension.
+                    one_dimension_sub_section = sub_section[:, dim]
+
                     # Z-normalized subsection.
-                    zn = znorm(sub_section, znorm_threshold)
+                    zn = znorm(one_dimension_sub_section, znorm_threshold)
 
                     # PAA representation of subsection.
                     paa_rep = paa(zn, paa_size, 'unidim')
