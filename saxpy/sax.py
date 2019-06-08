@@ -96,14 +96,29 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
                    nr_strategy='exact', znorm_threshold=0.01, sax_type='unidim'):
     """Simple via window conversion implementation.
 
+    # SAX-ENERGY
     >>> sax_via_window([[1, 2, 3], [4, 5, 6]], win_size=1, paa_size=1, sax_type='energy', nr_strategy=None)['abc']
     [0, 1]
 
+    >>> sax_via_window([[1, 2, 3, 4], [4, 5, 6, 7]], win_size=1, paa_size=1, sax_type='energy', nr_strategy=None)['aacc']
+    [0, 1]
+
+    >>> sax_via_window([[1, 2, 3, 4], [4, 5, 6, 7]], win_size=2, paa_size=2, sax_type='energy', nr_strategy=None)['aaccaacc']
+    [0]
+
+    # SAX-REPEAT
     >>> sax_via_window([[1, 2, 3], [4, 5, 6], [7, 8, 9]], win_size=2, paa_size=2, sax_type='repeat', nr_strategy=None)['ab']
     [0, 1]
 
     >>> sax_via_window([[1, 2, 3], [4, 5, 6], [7, 8, 9]], win_size=1, paa_size=1, sax_type='repeat', nr_strategy=None)['a']
     [0, 1, 2]
+
+    # SAX-INDEPENDENT
+    >>> sax_via_window([[1, 2, 3, 4], [4, 5, 6, 7]], win_size=2, paa_size=2, sax_type='independent', nr_strategy=None)['acacacac']
+    [0]
+
+    >>> sax_via_window([[1, 2], [4, 5], [7, 8]], win_size=2, paa_size=2, sax_type='independent', nr_strategy=None)['acac']
+    [0, 1]
 
     """
 
@@ -200,6 +215,22 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
 
                     # Add to current word.
                     curr_word += energy_word
+
+            elif sax_type == 'independent':
+                curr_word = ''
+                for dim in range(sub_section.shape[1]):
+                    one_dimension_subsequence = sub_section[:, i]
+                    # Z-normalized subsection.
+                    zn = znorm(sub_section, znorm_threshold)
+
+                    # PAA representation of subsection.
+                    paa_rep = paa(zn, paa_size, 'unidim')
+
+                    # Get the SAX word - just a unidimensional SAX.
+                    one_dim_word = ts_to_string(paa_rep, cuts)
+
+                    # Add this dimensions' representation to the overall SAX word.
+                    curr_word += one_dim_word
 
             else:
                 # Z-normalized subsection.

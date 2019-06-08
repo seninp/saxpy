@@ -26,7 +26,6 @@ def paa(series, paa_segment_size, sax_type='unidim'):
         num_dims = series.shape[1]
     else:
         num_dims = 1
-
         is_multidimensional = (len(series.shape) > 1) and (series.shape[1] > 1)
         if not is_multidimensional:
             series = series.reshape(series.shape[0], 1)
