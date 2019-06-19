@@ -13,7 +13,7 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, alphabet_size=3,
     globalRegistry = set()
 
     # Z-normalized versions for every subsequence.
-    znorms = [znorm(series[pos: pos + win_size], znorm_threshold) for pos in range(len(series) - win_size + 1)]
+    znorms = np.array([znorm(series[pos: pos + win_size], znorm_threshold) for pos in range(len(series) - win_size + 1)])
 
     # SAX words for every subsequence.
     sax_data = sax_via_window(series, win_size=win_size, paa_size=paa_size, alphabet_size=alphabet_size, nr_strategy=None, znorm_threshold=0.01, sax_type=sax_type)
