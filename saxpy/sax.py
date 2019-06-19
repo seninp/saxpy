@@ -136,7 +136,7 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
         raise ValueError('Please reshape time-series to stack dimensions along the 2nd dimension, so that the array shape is a 2-tuple.')
 
     # PAA size is the length of the PAA sequence.
-    if paa_size > win_size:
+    if sax_type != 'energy' and paa_size > win_size:
         raise ValueError('PAA size cannot be greater than the window size.')
 
     if sax_type == 'energy' and len(series.shape) == 1:
@@ -215,9 +215,12 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
                     # Normalize energy distribution.
                     energy_zn = znorm(energy_dist, znorm_threshold)
 
+                    # PAA representation of energy distribution.
+                    paa_rep = paa(energy_zn, paa_size, 'unidim')
+                    # paa_rep = energy_zn
+
                     # SAX representation of the energy distribution.
-                    # No PAA step because we have only 63 counts.
-                    energy_word = ts_to_string(energy_zn, cuts)
+                    energy_word = ts_to_string(paa_rep, cuts)
 
                     # Add to current word.
                     curr_word += energy_word
