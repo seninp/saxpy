@@ -12,11 +12,23 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, alphabet_size=3,
 
     globalRegistry = set()
 
+    # Z-normalized versions for every subsequence.
+    znorms = [znorm(series[pos: pos + win_size], znorm_threshold) for pos in range(len(series) - win_size + 1)]
+
+    # SAX words for every subsequence.
+    sax_data = sax_via_window(series, win_size=win_size, paa_size=paa_size, alphabet_size=alphabet_size, nr_strategy=None, znorm_threshold=0.01, sax_type=sax_type)
+
+    """[2.0] build the 'magic' array"""
+    magic_array = list()
+    for k, v in sax_data.items():
+        magic_array.append((k, len(v)))
+
+    """[2.1] sort it ascending by the number of occurrences"""
+    magic_array = sorted(magic_array, key=lambda tup: tup[1])
+
     while len(discords) < num_discords:
 
-        bestDiscord = find_best_discord_hotsax(series, win_size, alphabet_size,
-                                               paa_size, znorm_threshold,
-                                               globalRegistry, sax_type)
+        bestDiscord = find_best_discord_hotsax(series, win_size, globalRegistry, sax_data, magic_array, znorms)
 
         if -1 == bestDiscord[0]:
             break
@@ -32,19 +44,8 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, alphabet_size=3,
     return discords
 
 
-def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_threshold, globalRegistry, sax_type):
+def find_best_discord_hotsax(series, win_size, globalRegistry, sax_data, magic_array, znorms):
     """Find the best discord with hotsax."""
-
-    """[1.0] get the sax data first"""
-    sax_none = sax_via_window(series, win_size=win_size, paa_size=paa_size, alphabet_size=alphabet_size, nr_strategy=None, znorm_threshold=0.01, sax_type=sax_type)
-
-    """[2.0] build the 'magic' array"""
-    magic_array = list()
-    for k, v in sax_none.items():
-        magic_array.append((k, len(v)))
-
-    """[2.1] sort it desc by the key"""
-    m_arr = sorted(magic_array, key=lambda tup: tup[1])
 
     """[3.0] define the key vars"""
     bestSoFarPosition = -1
@@ -55,11 +56,11 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
     visit_array = np.zeros(len(series), dtype=np.int)
 
     """[4.0] and we are off iterating over the magic array entries"""
-    for entry in m_arr:
+    for entry in magic_array:
 
         """[5.0] current SAX words and the number of other sequences mapping to the same SAX word."""
         curr_word = entry[0]
-        occurrences = sax_none[curr_word]
+        occurrences = sax_data[curr_word]
 
         """[6.0] jumping around by the same word occurrences makes it easier to
         nail down the possibly small distance value -- so we can be efficient
@@ -75,8 +76,7 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
             visit_set = set(range(mark_start, mark_end))
 
             """[8.0] here is our subsequence in question"""
-            cur_seq = znorm(series[curr_pos:(curr_pos + win_size)],
-                            znorm_threshold)
+            cur_seq = znorms[curr_pos]
 
             """[9.0] let's see what is NN distance"""
             nn_dist = np.inf
@@ -92,7 +92,7 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
                     visit_set.add(next_pos)
 
                 """[12.0] distance we compute"""
-                dist = euclidean(cur_seq, znorm(series[next_pos:(next_pos + win_size)], znorm_threshold))
+                dist = euclidean(cur_seq, znorms[next_pos])
                 distanceCalls += 1
 
                 """[13.0] keep the books up-to-date"""
@@ -119,7 +119,7 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
                     rand_pos = it_order[curr_idx]
                     curr_idx -= 1
 
-                    dist = euclidean(cur_seq, znorm(series[rand_pos:(rand_pos + win_size)], znorm_threshold))
+                    dist = euclidean(cur_seq, znorms[rand_pos])
                     distanceCalls += 1
 
                     """[16.0] keep the books up-to-date again"""
@@ -134,5 +134,5 @@ def find_best_discord_hotsax(series, win_size, alphabet_size, paa_size, znorm_th
                 bestSoFarDistance = nn_dist
                 bestSoFarPosition = curr_pos
 
-    return (bestSoFarPosition, bestSoFarDistance)
+    return bestSoFarPosition, bestSoFarDistance
 
