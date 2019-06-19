@@ -10,12 +10,13 @@ def find_discords_brute_force(series, win_size, num_discords=2, znorm_threshold=
     discords = list()
 
     globalRegistry = VisitRegistry(len(series) - win_size + 1)
+    znorms = np.array([znorm(series[pos: pos + win_size], znorm_threshold) for pos in range(len(series) - win_size + 1)])
 
     while len(discords) < num_discords:
 
         bestDiscord = find_best_discord_brute_force(series, win_size,
                                                     globalRegistry,
-                                                    znorm_threshold)
+                                                    znorms)
 
         if -1 == bestDiscord[0]:
             break
@@ -30,7 +31,7 @@ def find_discords_brute_force(series, win_size, num_discords=2, znorm_threshold=
     return discords
 
 
-def find_best_discord_brute_force(series, win_size, global_registry, znorm_threshold=0.01):
+def find_best_discord_brute_force(series, win_size, global_registry, znorms):
     """Early-abandoned distance-based discord discovery."""
     best_so_far_distance = -1.0
     best_so_far_index = -1
@@ -43,7 +44,7 @@ def find_best_discord_brute_force(series, win_size, global_registry, znorm_thres
 
         outerRegistry.mark_visited(outer_idx)
 
-        candidate_seq = znorm(series[outer_idx:(outer_idx+win_size)], znorm_threshold)
+        candidate_seq = znorms[outer_idx]
 
         nnDistance = np.inf
         innerRegistry = VisitRegistry(len(series) - win_size + 1)
@@ -55,7 +56,7 @@ def find_best_discord_brute_force(series, win_size, global_registry, znorm_thres
 
             if abs(inner_idx - outer_idx) >= win_size:
 
-                curr_seq = znorm(series[inner_idx:(inner_idx+win_size)], znorm_threshold)
+                curr_seq = znorms[inner_idx]
 
                 dist = early_abandoned_euclidean(candidate_seq, curr_seq, nnDistance)
 
@@ -70,4 +71,4 @@ def find_best_discord_brute_force(series, win_size, global_registry, znorm_thres
 
         outer_idx = outerRegistry.get_next_unvisited()
 
-    return (best_so_far_index, best_so_far_distance)
+    return best_so_far_index, best_so_far_distance
