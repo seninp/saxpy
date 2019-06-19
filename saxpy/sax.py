@@ -97,13 +97,13 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
     """Simple via window conversion implementation.
 
     # SAX-ENERGY
-    >>> sax_via_window([[1, 2, 3], [4, 5, 6]], win_size=1, paa_size=1, sax_type='energy', nr_strategy=None)['abc']
+    >>> sax_via_window([[1, 2, 3], [4, 5, 6]], win_size=1, paa_size=3, sax_type='energy', nr_strategy=None)['abc']
     [0, 1]
 
-    >>> sax_via_window([[1, 2, 3, 4], [4, 5, 6, 7]], win_size=1, paa_size=1, sax_type='energy', nr_strategy=None)['aacc']
+    >>> sax_via_window([[1, 2, 3, 4], [4, 5, 6, 7]], win_size=1, paa_size=4, sax_type='energy', nr_strategy=None)['aacc']
     [0, 1]
 
-    >>> sax_via_window([[1, 2, 3, 4], [4, 5, 6, 7]], win_size=2, paa_size=2, sax_type='energy', nr_strategy=None)['aaccaacc']
+    >>> sax_via_window([[1, 2, 3, 4], [4, 5, 6, 7]], win_size=2, paa_size=4, sax_type='energy', nr_strategy=None)['aaccaacc']
     [0]
 
     # SAX-REPEAT
