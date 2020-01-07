@@ -49,7 +49,7 @@ def znorm(series, znorm_threshold=0.01):
         series = series - mu
         C = np.diagonal(C)
         indexes = (C >= np.square(znorm_threshold))
-        series[:, indexes] = (series / np.sqrt(C))[:, indexes]
+        series[:, indexes] = (series[:, indexes] / np.sqrt(C[indexes]))
     else:
         series = series - mu
         if C >= np.square(znorm_threshold):
