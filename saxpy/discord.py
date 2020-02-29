@@ -46,8 +46,8 @@ def find_best_discord_brute_force(series, win_size, global_registry, znorms):
 
         candidate_seq = znorms[outer_idx]
 
-        nnDistance = np.inf
-        innerRegistry = VisitRegistry(len(series) - win_size + 1)
+        nn_distance = np.inf
+        inner_registry = VisitRegistry(len(series) - win_size + 1)
 
         inner_idx = inner_registry.get_next_unvisited()
 
@@ -58,7 +58,7 @@ def find_best_discord_brute_force(series, win_size, global_registry, znorms):
 
                 curr_seq = znorms[inner_idx]
 
-                dist = early_abandoned_euclidean(candidate_seq, curr_seq, nnDistance)
+                dist = early_abandoned_euclidean(candidate_seq, curr_seq, nn_distance)
 
                 if (~np.isnan(dist)) and (dist < nn_distance):
                     nn_distance = dist
