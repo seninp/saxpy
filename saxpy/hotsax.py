@@ -10,35 +10,35 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
     """HOT-SAX-driven discords discovery."""
     discords = list()
 
-    globalRegistry = set()
+    global_registry = set()
 
-    while (len(discords) < num_discords):
+    while len(discords) < num_discords:
 
-        bestDiscord = find_best_discord_hotsax(series, win_size, a_size,
+        best_discord = find_best_discord_hotsax(series, win_size, a_size,
                                                paa_size, z_threshold,
-                                               globalRegistry)
+                                               global_registry)
 
-        if -1 == bestDiscord[0]:
+        if -1 == best_discord[0]:
             break
 
-        discords.append(bestDiscord)
+        discords.append(best_discord)
 
-        mark_start = bestDiscord[0] - win_size
+        mark_start = best_discord[0] - win_size
         if 0 > mark_start:
             mark_start = 0
 
-        mark_end = bestDiscord[0] + win_size
+        mark_end = best_discord[0] + win_size
         '''if len(series) < mark_end:
             mark_end = len(series)'''
 
         for i in range(mark_start, mark_end):
-            globalRegistry.add(i)
+            global_registry.add(i)
 
     return discords
 
 
 def find_best_discord_hotsax(series, win_size, a_size, paa_size,
-                             znorm_threshold, globalRegistry): # noqa: C901
+                             znorm_threshold, global_registry):  # noqa: C901
     """Find the best discord with hotsax."""
     """[1.0] get the sax data first"""
     sax_none = sax_via_window(series, win_size, a_size, paa_size, "none", 0.01)
@@ -52,10 +52,10 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
     m_arr = sorted(magic_array, key=lambda tup: tup[1])
 
     """[3.0] define the key vars"""
-    bestSoFarPosition = -1
-    bestSoFarDistance = 0.
+    best_so_far_position = -1
+    best_so_far_distance = 0.
 
-    distanceCalls = 0
+    distance_calls = 0
 
     visit_array = np.zeros(len(series), dtype=np.int)
 
@@ -71,7 +71,7 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
         and all that..."""
         for curr_pos in occurrences:
 
-            if curr_pos in globalRegistry:
+            if curr_pos in global_registry:
                 continue
 
             """[7.0] we don't want an overlapping subsequence"""
@@ -99,12 +99,12 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
                 """[12.0] distance we compute"""
                 dist = euclidean(cur_seq, znorm(series[next_pos:(
                                  next_pos+win_size)], znorm_threshold))
-                distanceCalls += 1
+                distance_calls += 1
 
                 """[13.0] keep the books up-to-date"""
                 if dist < nn_dist:
                     nn_dist = dist
-                if dist < bestSoFarDistance:
+                if dist < best_so_far_distance:
                     do_random_search = 0
                     break
 
@@ -127,18 +127,18 @@ def find_best_discord_hotsax(series, win_size, a_size, paa_size,
 
                     dist = euclidean(cur_seq, znorm(series[rand_pos:(
                                      rand_pos + win_size)], znorm_threshold))
-                    distanceCalls += 1
+                    distance_calls += 1
 
                     """[16.0] keep the books up-to-date again"""
                     if dist < nn_dist:
                         nn_dist = dist
-                    if dist < bestSoFarDistance:
+                    if dist < best_so_far_distance:
                         nn_dist = dist
                         break
 
             """[17.0] and BIGGER books"""
-            if (nn_dist > bestSoFarDistance) and (nn_dist < np.inf):
-                bestSoFarDistance = nn_dist
-                bestSoFarPosition = curr_pos
+            if (nn_dist > best_so_far_distance) and (nn_dist < np.inf):
+                best_so_far_distance = nn_dist
+                best_so_far_position = curr_pos
 
-    return (bestSoFarPosition, bestSoFarDistance)
+    return best_so_far_position, best_so_far_distance

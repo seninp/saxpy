@@ -17,7 +17,7 @@ class VisitRegistry:
 
     def mark_visited(self, index):
         """Set a single index as visited."""
-        if (0 == self.visit_array[index]):
+        if 0 == self.visit_array[index]:
             self.visit_array[index] = 1
             self.unvisited_count -= 1
 
