@@ -36,6 +36,7 @@ def paa(series, paa_segment_size, sax_type='unidim'):
         # Check if we can evenly divide the series.
         if series_len % paa_segment_size == 0:
             inc = series_len // paa_segment_size
+
             for i in range(0, series_len):
                 idx = i // inc
                 np.add.at(res[dim], idx, np.mean(series[i][dim]))

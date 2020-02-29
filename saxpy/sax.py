@@ -63,6 +63,7 @@ def ts_to_string(series, cuts):
         if num >= 0:
             j = a_size - 1
             while j > 0 and cuts[j] >= num:
+
                 j = j - 1
             sax.append(idx2letter(j))
         else:

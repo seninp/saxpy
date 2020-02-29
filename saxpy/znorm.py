@@ -59,5 +59,3 @@ def znorm(series, znorm_threshold=0.01):
     assert(series.shape == original_series_shape)
 
     return series
-
-

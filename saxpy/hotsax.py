@@ -10,7 +10,7 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, alphabet_size=3,
     """HOT-SAX-driven discords discovery."""
     discords = list()
 
-    globalRegistry = set()
+    global_registry = set()
 
     # Z-normalized versions for every subsequence.
     znorms = np.array([znorm(series[pos: pos + win_size], znorm_threshold) for pos in range(len(series) - win_size + 1)])
@@ -30,16 +30,16 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, alphabet_size=3,
 
         bestDiscord = find_best_discord_hotsax(series, win_size, globalRegistry, sax_data, magic_array, znorms)
 
-        if -1 == bestDiscord[0]:
+        if -1 == best_discord[0]:
             break
 
-        discords.append(bestDiscord)
+        discords.append(best_discord)
 
         mark_start = max(0, bestDiscord[0] - win_size + 1)
         mark_end = bestDiscord[0] + win_size
 
         for i in range(mark_start, mark_end):
-            globalRegistry.add(i)
+            global_registry.add(i)
 
     return discords
 
@@ -48,10 +48,10 @@ def find_best_discord_hotsax(series, win_size, globalRegistry, sax_data, magic_a
     """Find the best discord with hotsax."""
 
     """[3.0] define the key vars"""
-    bestSoFarPosition = -1
-    bestSoFarDistance = 0.
+    best_so_far_position = -1
+    best_so_far_distance = 0.
 
-    distanceCalls = 0
+    distance_calls = 0
 
     visit_array = np.zeros(len(series), dtype=np.int)
 
@@ -67,7 +67,7 @@ def find_best_discord_hotsax(series, win_size, globalRegistry, sax_data, magic_a
         and all that..."""
         for curr_pos in occurrences:
 
-            if curr_pos in globalRegistry:
+            if curr_pos in global_registry:
                 continue
 
             """[7.0] we don't want an overlapping subsequence"""
@@ -92,6 +92,7 @@ def find_best_discord_hotsax(series, win_size, globalRegistry, sax_data, magic_a
                     visit_set.add(next_pos)
 
                 """[12.0] distance we compute"""
+
                 dist = euclidean(cur_seq, znorms[next_pos])
                 distanceCalls += 1
 
@@ -125,14 +126,14 @@ def find_best_discord_hotsax(series, win_size, globalRegistry, sax_data, magic_a
                     """[16.0] keep the books up-to-date again"""
                     if dist < nn_dist:
                         nn_dist = dist
-                    if dist < bestSoFarDistance:
+                    if dist < best_so_far_distance:
                         nn_dist = dist
                         break
 
             """[17.0] and BIGGER books"""
-            if (nn_dist > bestSoFarDistance) and (nn_dist < np.inf):
-                bestSoFarDistance = nn_dist
-                bestSoFarPosition = curr_pos
+            if (nn_dist > best_so_far_distance) and (nn_dist < np.inf):
+                best_so_far_distance = nn_dist
+                best_so_far_position = curr_pos
 
     return bestSoFarPosition, bestSoFarDistance
-
+  

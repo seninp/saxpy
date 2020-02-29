@@ -36,23 +36,23 @@ def find_best_discord_brute_force(series, win_size, global_registry, znorms):
     best_so_far_distance = -1.0
     best_so_far_index = -1
 
-    outerRegistry = global_registry.clone()
+    outer_registry = global_registry.clone()
 
-    outer_idx = outerRegistry.get_next_unvisited()
+    outer_idx = outer_registry.get_next_unvisited()
 
     while ~np.isnan(outer_idx):
 
-        outerRegistry.mark_visited(outer_idx)
+        outer_registry.mark_visited(outer_idx)
 
         candidate_seq = znorms[outer_idx]
 
         nnDistance = np.inf
         innerRegistry = VisitRegistry(len(series) - win_size + 1)
 
-        inner_idx = innerRegistry.get_next_unvisited()
+        inner_idx = inner_registry.get_next_unvisited()
 
         while ~np.isnan(inner_idx):
-            innerRegistry.mark_visited(inner_idx)
+            inner_registry.mark_visited(inner_idx)
 
             if abs(inner_idx - outer_idx) >= win_size:
 
@@ -60,15 +60,15 @@ def find_best_discord_brute_force(series, win_size, global_registry, znorms):
 
                 dist = early_abandoned_euclidean(candidate_seq, curr_seq, nnDistance)
 
-                if (~np.isnan(dist)) and (dist < nnDistance):
-                    nnDistance = dist
+                if (~np.isnan(dist)) and (dist < nn_distance):
+                    nn_distance = dist
 
-            inner_idx = innerRegistry.get_next_unvisited()
+            inner_idx = inner_registry.get_next_unvisited()
 
-        if ~(np.inf == nnDistance) and (nnDistance > best_so_far_distance):
-            best_so_far_distance = nnDistance
+        if ~(np.inf == nn_distance) and (nn_distance > best_so_far_distance):
+            best_so_far_distance = nn_distance
             best_so_far_index = outer_idx
 
-        outer_idx = outerRegistry.get_next_unvisited()
+        outer_idx = outer_registry.get_next_unvisited()
 
     return best_so_far_index, best_so_far_distance
