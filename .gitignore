@@ -14,3 +14,4 @@ ChangeLog
 .pypirc
 jupyter/.ipynb*
 /venv/
+.idea/
