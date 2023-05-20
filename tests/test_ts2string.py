@@ -6,17 +6,26 @@ from saxpy import sax
 
 def test_stringing():
     """Test string conversion."""
-    # 11: np.array([-np.inf, -1.33517773611894, -0.908457868537385,
-    #             -0.604585346583237, -0.348755695517045,
-    #             -0.114185294321428, 0.114185294321428, 0.348755695517045,
-    #             0.604585346583237, 0.908457868537385, 1.33517773611894]),
-    ab = sax.ts_to_string(np.array([-1.33517773611895, -1.33517773611894]),
+    # 11: np.array([-inf, -1.33517774, -0.90845787, -0.60458535,
+    #               -0.3487557, -0.11418529, 0.11418529, 0.3487557,
+    #               0.60458535, 0.90845787, 1.33517774]),
+
+    ab = sax.ts_to_string(np.array([-1.33517775 , -1.33517773]),
                           alphabet.cuts_for_asize(11))
     assert 'ab' == ab
 
-    kj = sax.ts_to_string(np.array([1.33517773611895, 1.33517773611894]),
+    kj = sax.ts_to_string(np.array([1.33517775, 1.33517773]),
                           alphabet.cuts_for_asize(11))
     assert 'kj' == kj
+
+    # Test to handel cuts of size 26
+    print(alphabet.cuts_for_asize(26))
+
+    yz = sax.ts_to_string(np.array([1.76882503, 1.76882505]),
+                          alphabet.cuts_for_asize(26))
+    
+    assert 'yz' == yz
+    
 
 
 def test_mindist():

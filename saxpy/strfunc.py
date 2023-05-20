@@ -3,7 +3,7 @@
 
 def idx2letter(idx):
     """Convert a numerical index to a char."""
-    if 0 <= idx < 20:
+    if 0 <= idx < 26:
         return chr(97 + idx)
     else:
         raise ValueError('A wrong idx value supplied.')

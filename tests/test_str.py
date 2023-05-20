@@ -8,9 +8,10 @@ def test_sizing():
     assert 'a' == idx2letter(0)
     assert 'h' == idx2letter(7)
     assert 't' == idx2letter(19)
+    assert 'z' == idx2letter(25)
 
     with pytest.raises(ValueError, match=r'.* idx'):
         idx2letter(-1)
 
     with pytest.raises(ValueError, match=r'.* idx .*'):
-        idx2letter(20)
+        idx2letter(26)
