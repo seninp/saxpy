@@ -2,5 +2,5 @@ numpy
 pytest
 pytest-cov
 codecov
-sklearn
+scikit-learn
 scipy
