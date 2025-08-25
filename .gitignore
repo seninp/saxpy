@@ -13,5 +13,6 @@ ChangeLog
 .coverage
 .pypirc
 jupyter/.ipynb*
-/venv/
+/.venv/
+/.vscode/
 .idea/

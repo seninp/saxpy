@@ -54,7 +54,7 @@ def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_
 
     distance_calls = 0
 
-    visit_array = np.zeros(len(series), dtype=np.int)
+    visit_array = np.zeros(len(series), dtype=int)
 
     """[4.0] and we are off iterating over the magic array entries"""
     for entry in magic_array:

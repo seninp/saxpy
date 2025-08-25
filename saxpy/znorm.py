@@ -25,13 +25,13 @@ def l2norm(array):
 def znorm(series, znorm_threshold=0.01):
     """Znorm implementation.
 
-    >>> print ['{:0.2f}'.format(x) for x in znorm([1, 2, 3])]
+    >>> print(['{:0.2f}'.format(x) for x in znorm([1, 2, 3])])
     ['-1.22', '0.00', '1.22']
-    >>> print ['{:0.2f}'.format(x) for x in znorm([3, 2, 1])]
+    >>> print(['{:0.2f}'.format(x) for x in znorm([3, 2, 1])])
     ['1.22', '0.00', '-1.22']
-    >>> print ['{:0.2f}'.format(x) for x in znorm([1, 2])]
+    >>> print(['{:0.2f}'.format(x) for x in znorm([1, 2])])
     ['-1.00', '1.00']
-    >>> print ['{:0.2f}'.format(x) for x in np.sum(znorm([[1, 2, 3], [6, 5, 4]]), axis=0)]
+    >>> print(['{:0.2f}'.format(x) for x in np.sum(znorm([[1, 2, 3], [6, 5, 4]]), axis=0)])
     ['0.00', '0.00', '0.00']
     >>> znorm([[1, 2, 3], [6, 5, 4]])
     array([[-1., -1., -1.],

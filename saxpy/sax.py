@@ -108,7 +108,7 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
     [0]
 
     # SAX-REPEAT
-    >>> sax_via_window([[1, 2, 3], [4, 5, 6], [7, 8, 9]], win_size=2, paa_size=2, sax_type='repeat', nr_strategy=None)['ab']
+    >>> sax_via_window([[1, 2, 3], [4, 5, 6], [7, 8, 9]], win_size=2, paa_size=2, sax_type='repeat', nr_strategy=None)['ac']
     [0, 1]
 
     >>> sax_via_window([[1, 2, 3], [4, 5, 6], [7, 8, 9]], win_size=1, paa_size=1, sax_type='repeat', nr_strategy=None)['a']
