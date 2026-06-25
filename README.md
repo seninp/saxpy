@@ -1,8 +1,6 @@
 Time series symbolic discretization with SAX
 ====
 [![Latest PyPI version](https://img.shields.io/pypi/v/saxpy.svg)](https://pypi.python.org/pypi/saxpy)
-[![Latest Travis CI build status](https://travis-ci.org/seninp/saxpy.png)](https://travis-ci.org/seninp/saxpy)
-[![image](https://codecov.io/gh/seninp/saxpy/branch/master/graph/badge.svg)](https://codecov.io/gh/seninp/saxpy)
 [![image](http://img.shields.io/:license-gpl2-green.svg)](http://www.gnu.org/licenses/gpl-2.0.html)
 
 
@@ -18,19 +16,19 @@ Note that all of the library's functionality is also available in [R](https://gi
 
 
 ## References
-[1] Lin, J., Keogh, E., Patel, P., and Lonardi, S.,   
-[*Finding Motifs in Time Series*](http://cs.gmu.edu/~jessica/Lin_motif.pdf), 
+[1] Lin, J., Keogh, E., Patel, P., and Lonardi, S.,
+[*Finding Motifs in Time Series*](http://cs.gmu.edu/~jessica/Lin_motif.pdf),
 The 2nd Workshop on Temporal Data Mining, the 8th ACM Int'l Conference on KDD (2002)
 
-[2] Patel, P., Keogh, E., Lin, J., Lonardi, S.,   
-[*Mining Motifs in Massive Time Series Databases*](http://www.cs.gmu.edu/~jessica/publications/motif_icdm02.pdf), 
+[2] Patel, P., Keogh, E., Lin, J., Lonardi, S.,
+[*Mining Motifs in Massive Time Series Databases*](http://www.cs.gmu.edu/~jessica/publications/motif_icdm02.pdf),
 In Proc. ICDM (2002)
 
-[3] Keogh, E., Lin, J., Fu, A.,  
+[3] Keogh, E., Lin, J., Fu, A.,
 [*HOT SAX: Efficiently finding the most unusual time series subsequence*](http://www.cs.ucr.edu/~eamonn/HOT%20SAX%20%20long-ver.pdf),
 In Proc. ICDM (2005)
 
-[4] Mohammad, Y., Nishida T.,  
+[4] Mohammad, Y., Nishida T.,
 [*Robust learning from demonstrations using multidimensional SAX*](https://ieeexplore.ieee.org/document/6987960),
 2014 14th International Conference on Control, Automation and Systems (ICCAS 2014)
 
@@ -48,21 +46,33 @@ SAX is used to transform a sequence of rational numbers (i.e., a time series) in
 
 As discretization is probably the most used transformation in data mining, SAX has been widely used throughout the field. Find more information about SAX at its authors pages: [SAX overview by Jessica Lin](http://cs.gmu.edu/~jessica/sax.htm), [Eamonn Keogh's SAX page](http://www.cs.ucr.edu/~eamonn/SAX.htm), or at [sax-vsm wiki page](http://jmotif.github.io/sax-vsm_site/morea/algorithm/SAX.html).
 
-Building
+Installation
 ------------
-The code is written in Python and hosted on PyPi, so use `pip` to install it. This is what happens in my clean test environment:
+saxpy is published on PyPI, so install it with `pip` (or `uv pip`):
 
 	$ pip install saxpy
-	Collecting saxpy
-  	Downloading saxpy-1.0.0.dev154.tar.gz (180kB)
-    	100% |████████████████████████████████| 184kB 778kB/s 
-	Requirement already satisfied: numpy in /home/psenin/anaconda3/lib/python3.6/site-packages (from saxpy)
-	Requirement already satisfied: pytest in /home/psenin/anaconda3/lib/python3.6/site-packages (from saxpy)
-	...
-	Installing collected packages: coverage, pytest-cov, codecov, saxpy
-	Successfully installed codecov-2.0.15 coverage-4.5.1 pytest-cov-2.5.1 saxpy-1.0.0.dev154
 
+saxpy requires Python 3.10+ and depends on `numpy`, `scipy`, and `scikit-learn`.
 
+Development
+------------
+The project uses [uv](https://docs.astral.sh/uv/) for environment management and packaging
+(PEP 621 / `pyproject.toml`, Hatchling build backend). To work on saxpy from a clone:
+
+	$ uv sync                 # create the venv and install saxpy + dev tools
+	$ uv run pytest           # run the test suite (unit tests + doctests)
+	$ uv run ruff check       # lint
+	$ uv run ruff format      # format
+	$ uv run mypy saxpy       # type-check
+
+To run the tests across all supported interpreters:
+
+	$ uv run --python 3.10 pytest
+	$ uv run --python 3.11 pytest
+	$ uv run --python 3.12 pytest
+
+To build the distribution artifacts (`uv build` produces a wheel + sdist in `dist/`),
+and enable the pre-commit hooks (ruff + mypy) with `uv run pre-commit install`.
 
 Simple time series to SAX conversion
 ------------
@@ -89,16 +99,16 @@ this produces a string:
 Time series to SAX conversion with PAA aggregation (by "chunking")
 ------------
 In order to reduce dimensionality further, the PAA (Piecewise Aggregate Approximation) is usually applied prior to SAX:
-	
+
 	import numpy as np
 	from saxpy.znorm import znorm
 	from saxpy.paa import paa
 	from saxpy.sax import ts_to_string
-	
+
 	dat = np.array([-2, 0, 2, 0, -1])
 	dat_znorm = znorm(dat)
 	dat_paa_3 = paa(dat_znorm, 3)
-	
+
 	ts_to_string(dat_paa_3, cuts_for_asize(3))
 
 and a string with three letters is produced:
@@ -109,7 +119,7 @@ and a string with three letters is produced:
 Time series to SAX conversion via sliding window
 ------------
 Typically, in order to investigate the input time series structure in order to discover anomalous (i.e., discords) and recurrent (i.e., motifs) patterns we employ time series to SAX conversion via sliding window. Saxpy implements this workflow:
-	
+
 	import numpy as np
 	from saxpy.sax import sax_via_window
 
@@ -130,7 +140,7 @@ Typically, in order to investigate the input time series structure in order to d
                 -0.0663660879732063, 0., 0., 0., 0., 0.,])
 
 	sax_none = sax_via_window(dat, win_size=6, paa_size=3, alphabet_size=3, nr_strategy=None, znorm_threshold=0.01)
-	
+
 	sax1
 
 the result is represented as a data structure of resulting words and their respective positions on time series:
@@ -151,20 +161,20 @@ the result is represented as a data structure of resulting words and their respe
              'cbb': [33],
              'cca': [0, 1]})
 
-`sax_via_window` is parameterised with a sliding window size, desired PAA aggregation, alphabet size, a numerosity reduction strategy, z-normalization threshold, and a SAX type ('unidim' for unidimensional SAX (default), 'zscore' for SAX-ZSCORE, 'repeat' for SAX-REPEAT): 
+`sax_via_window` is parameterised with a sliding window size, desired PAA aggregation, alphabet size, a numerosity reduction strategy, z-normalization threshold, and a SAX type ('unidim' for unidimensional SAX (default), 'zscore' for SAX-ZSCORE, 'repeat' for SAX-REPEAT):
 
 	def sax_via_window(series, win_size, paa_size, alphabet_size=3,
-                   nr_strategy='exact', z_threshold=0.01, sax_type='unidim')
+                   nr_strategy='exact', znorm_threshold=0.01, sax_type='unidim')
 
 
 Time series discord discovery with HOT-SAX
 ------------
 Saxpy implements HOT-SAX discord discovery algorithm in `find_discords_hotsax` function which can be used as follows:
-	
+
 	import numpy as np
 	from saxpy.hotsax import find_discords_hotsax
 	from numpy import genfromtxt
-	dd = genfromtxt("data/ecg0606_1.csv", delimiter=',')  
+	dd = genfromtxt("data/ecg0606_1.csv", delimiter=',')
 	discords = find_discords_hotsax(dd)
 	discords
 
@@ -175,19 +185,19 @@ and discovers anomalies easily:
 The function has a similar parameterization: sliding window size, PAA and alphabet sizes, z-normalization threshold, and a parameter specifying how many discords are desired to be found:
 
 	def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
-                         paa_size=3, z_threshold=0.01)
+                         paa_size=3, znorm_threshold=0.01)
 
 Saxpy also provides a brute-force implementation of the discord search if you'd like to verify discords or evaluate the speed-up:
 
 	find_discords_brute_force(series, win_size, num_discords=2,
-                              z_threshold=0.01)
+                              znorm_threshold=0.01)
 which can be called as follows:
 
 	discords = find_discords_brute_force(dd[100:500], 100, 4)
 	discords
-	
+
 	[(73, 6.198555329625453), (219, 5.5636923991016136)]
-	
+
 Time series motif discovery with EMMA
 ------------
 ToDo...

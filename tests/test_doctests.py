@@ -1,7 +1,10 @@
 import doctest
 import warnings
+
 from sklearn.exceptions import ConvergenceWarning
-from saxpy import paa, sax, znorm
+
+from saxpy import alphabet, paa, sax, znorm
+
 
 def run_doctests(module):
     """Helper to run doctests on a module and fail if any fail."""
@@ -12,19 +15,24 @@ def run_doctests(module):
             category=ConvergenceWarning,
             module=r"^sklearn(\.|$)",
         )
-        failures, _ = doctest.testmod(
-            module,
-            optionflags=doctest.NORMALIZE_WHITESPACE
-        )
+        failures, _ = doctest.testmod(module, optionflags=doctest.NORMALIZE_WHITESPACE)
     assert failures == 0, f"Doctests failed in {module.__name__}"
+
+
+def test_alphabet_doctests():
+    """Test alphabet module doctests."""
+    run_doctests(alphabet)
+
 
 def test_paa_doctests():
     """Test PAA module doctests."""
     run_doctests(paa)
 
+
 def test_sax_doctests():
     """Test SAX module doctests."""
     run_doctests(sax)
+
 
 def test_znorm_doctests():
     """Test Z-norm module doctests."""

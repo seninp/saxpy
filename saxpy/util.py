@@ -1,17 +1,18 @@
 """Some helpers."""
+
 import re
 
 
 def read_ucr_data(fname):
     data = []
 
-    with open(fname, 'r') as fp:
+    with open(fname) as fp:
         read_lines = fp.readlines()
         for line in read_lines:
             tokens = re.split("\\s+", line.strip())
 
             t0 = tokens.pop(0)
-            if re.match("^\d+?\.\d+?e[\+\-]?\d+?$", t0) is None:
+            if re.match(r"^\d+?\.\d+?e[\+\-]?\d+?$", t0) is None:
                 class_label = t0
             else:
                 class_label = str(int(float(t0)))

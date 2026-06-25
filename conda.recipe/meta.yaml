@@ -1,6 +1,6 @@
 package:
   name: saxpy
-  version: 0.1.0
+  version: 1.1.0
 
 build:
   # If the installation is complex, or different between Unix and Windows, use
@@ -25,5 +25,5 @@ test:
     - saxpy
 
 about:
-  summary: SAX: time series symbolic discretization stack
+  summary: "SAX: time series symbolic discretization stack"
   license_file: LICENSE

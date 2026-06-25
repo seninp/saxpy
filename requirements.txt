@@ -1,6 +1,0 @@
-numpy
-pytest
-pytest-cov
-codecov
-scikit-learn
-scipy

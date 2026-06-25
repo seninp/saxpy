@@ -6,6 +6,9 @@ _generate/
 .cache*
 .tox*
 .eggs*
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
 ChangeLog
 *.so
 *.py[cod]

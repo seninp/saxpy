@@ -1,4 +1,5 @@
 """Testing PAA implementation."""
+
 from saxpy import alphabet
 
 

@@ -6,4 +6,4 @@ def idx2letter(idx):
     if 0 <= idx < 20:
         return chr(97 + idx)
     else:
-        raise ValueError('A wrong idx value supplied.')
+        raise ValueError("A wrong idx value supplied.")
