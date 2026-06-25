@@ -184,8 +184,8 @@ and discovers anomalies easily:
 
 The function has a similar parameterization: sliding window size, PAA and alphabet sizes, z-normalization threshold, and a parameter specifying how many discords are desired to be found:
 
-	def find_discords_hotsax(series, win_size=100, num_discords=2, a_size=3,
-                         paa_size=3, znorm_threshold=0.01)
+	def find_discords_hotsax(series, win_size=100, num_discords=2, paa_size=3,
+                         alphabet_size=3, znorm_threshold=0.01, sax_type='unidim')
 
 Saxpy also provides a brute-force implementation of the discord search if you'd like to verify discords or evaluate the speed-up:
 

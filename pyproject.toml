@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "saxpy"
-version = "1.1.0"
+version = "2.0.0"
 description = "SAX, HOT-SAX, and SAX-VSM implementations for time series symbolic discretization in Python"
 readme = "README.md"
 requires-python = ">=3.10"

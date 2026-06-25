@@ -141,6 +141,15 @@ def sax_via_window(
     if sax_type == "energy" and len(series.shape) == 1:
         raise ValueError("Must pass a multidimensional time-series to SAX-ENERGY.")
 
+    if sax_type == "repeat" and nr_strategy == "mindist":
+        # SAX-REPEAT letters are KMeans cluster ids (lexsort-ordered centroids),
+        # not an ordinal alphabet, so is_mindist_zero's ord()-adjacency test is
+        # meaningless and would collapse unrelated words.
+        raise ValueError(
+            "nr_strategy='mindist' is undefined for SAX-REPEAT: its letters are "
+            "cluster ids, not an ordinal alphabet. Use 'exact' or None."
+        )
+
     # Breakpoints.
     cuts = cuts_for_asize(alphabet_size)
 
@@ -175,7 +184,15 @@ def sax_via_window(
             multidim_sax_dict.append(multidim_sax)
             multidim_sax_list.extend(multidim_sax)
 
-        # Cluster with k-means++.
+        # Cluster with k-means++. KMeans needs at least alphabet_size samples;
+        # surface that as a clear error rather than sklearn's opaque
+        # "n_samples should be >= n_clusters".
+        if len(multidim_sax_list) < alphabet_size:
+            raise ValueError(
+                f"alphabet_size={alphabet_size} exceeds the {len(multidim_sax_list)} "
+                "multi-dimensional SAX vectors available to cluster; reduce "
+                "alphabet_size, widen the window, or provide more data."
+            )
         kmeans = KMeans(n_clusters=alphabet_size, random_state=0).fit(multidim_sax_list)
 
         # Cluster indices in sorted order.

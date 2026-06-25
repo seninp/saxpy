@@ -68,6 +68,25 @@ def test_result_is_deterministic_across_seeds():
     assert len(results) == 1
 
 
+def test_param_order_matches_sax_via_window():
+    """Regression (audit #31): find_discords_hotsax used to order its size
+    params (alphabet_size, paa_size) -- the reverse of sax_via_window
+    (paa_size, alphabet_size) -- a silent footgun for positional callers. The
+    signature is now (..., paa_size, alphabet_size, ...). Passing them
+    positionally must bind paa_size then alphabet_size, matching the keyword
+    call."""
+    import inspect
+
+    params = list(inspect.signature(find_discords_hotsax).parameters)
+    assert params.index("paa_size") < params.index("alphabet_size")
+
+    series = np.random.RandomState(0).randn(300)
+    series[100:130] += 8.0
+    positional = find_discords_hotsax(series, 30, 1, 4, 5)  # paa_size=4, alphabet_size=5
+    keyword = find_discords_hotsax(series, win_size=30, num_discords=1, paa_size=4, alphabet_size=5)
+    assert positional == keyword
+
+
 def test_znorm_threshold_is_forwarded(monkeypatch):
     """Regression (audit #2): find_discords_hotsax used to hardcode
     znorm_threshold=0.01 in its internal sax_via_window call while the distance

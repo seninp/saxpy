@@ -1,6 +1,7 @@
 """Testing SAX implementation."""
 
 import numpy as np
+import pytest
 
 from saxpy.sax import sax_via_window
 
@@ -121,3 +122,36 @@ def test_win_size_one_preserves_information_independent():
 
     assert len(sax) > 1
     assert sum(len(v) for v in sax.values()) == dat.shape[0]
+
+
+def test_repeat_rejects_alphabet_larger_than_samples():
+    """Regression (audit #8): SAX-REPEAT fed alphabet_size straight to KMeans
+    n_clusters; when fewer SAX vectors than alphabet_size are available it
+    crashed with sklearn's opaque 'n_samples should be >= n_clusters'. It must
+    now raise a clear, descriptive ValueError."""
+    data = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
+    with pytest.raises(ValueError, match="exceeds"):
+        sax_via_window(
+            data, win_size=2, paa_size=2, alphabet_size=5, sax_type="repeat", nr_strategy=None
+        )
+
+
+@pytest.mark.filterwarnings("ignore::sklearn.exceptions.ConvergenceWarning")
+def test_repeat_rejects_mindist():
+    """Regression (audit #9): nr_strategy='mindist' assumes an ordinal alphabet,
+    but SAX-REPEAT letters are KMeans cluster ids, so mindist over-collapses
+    unrelated words. The combination must be rejected.
+
+    (KMeans may emit a benign ConvergenceWarning here: SAX discretization
+    collapses the multi-dim vectors to fewer distinct points than the requested
+    alphabet, which is unrelated to what this test asserts.)"""
+    data = [[float(i), float(i) + 0.1] for i in range(12)]
+    with pytest.raises(ValueError, match="mindist"):
+        sax_via_window(
+            data, win_size=2, paa_size=2, alphabet_size=4, sax_type="repeat", nr_strategy="mindist"
+        )
+
+    # 'exact' and None remain valid for repeat.
+    assert sax_via_window(
+        data, win_size=2, paa_size=2, alphabet_size=4, sax_type="repeat", nr_strategy="exact"
+    )

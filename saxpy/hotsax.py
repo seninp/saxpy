@@ -11,12 +11,17 @@ def find_discords_hotsax(
     series,
     win_size=100,
     num_discords=2,
-    alphabet_size=3,
     paa_size=3,
+    alphabet_size=3,
     znorm_threshold=0.01,
     sax_type="unidim",
 ):
     """HOT-SAX-driven discords discovery.
+
+    Argument order: ``(series, win_size, num_discords, paa_size, alphabet_size,
+    znorm_threshold, sax_type)`` -- ``paa_size`` precedes ``alphabet_size`` to
+    match ``sax_via_window`` (changed in 2.0.0; the two were previously
+    reversed, a silent footgun for positional callers).
 
     The random-search phase shuffles candidate visit order (an early-abandoning
     speed heuristic), but the returned discords are reproducible: a candidate's
