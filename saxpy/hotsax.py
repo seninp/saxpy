@@ -107,7 +107,7 @@ def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_
                 continue
 
             """[7.0] we don't want an overlapping subsequence"""
-            mark_start = curr_pos - win_size + 1
+            mark_start = max(0, curr_pos - win_size + 1)
             mark_end = curr_pos + win_size
             visit_set = set(range(mark_start, mark_end))
 
@@ -128,6 +128,13 @@ def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_
 
                 """[12.0] distance we compute"""
 
+                # NB: keep the vectorized euclidean here, NOT the element-wise
+                # early_abandoned_euclidean (audit #17). Its abandoning is a
+                # pure-Python per-element np.dot loop, ~47x slower per call than
+                # np.sqrt(np.sum(...)) on these win_size windows; unless it
+                # abandons within the first ~2 elements it loses badly, and
+                # swapping it in made HOT-SAX ~3x slower overall. Measured, not
+                # assumed.
                 dist = euclidean(cur_seq, znorms[next_pos])
                 distance_calls += 1
 
@@ -155,6 +162,8 @@ def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_
                     rand_pos = it_order[curr_idx]
                     curr_idx -= 1
 
+                    # Vectorized euclidean, not early_abandoned_euclidean -- see
+                    # the note in the occurrences loop above (audit #17).
                     dist = euclidean(cur_seq, znorms[rand_pos])
                     distance_calls += 1
 

@@ -40,27 +40,37 @@ def paa(series, paa_segment_size, sax_type="unidim"):
     else:
         num_dims = 1
         is_multidimensional = (len(series.shape) > 1) and (series.shape[1] > 1)
-        if not is_multidimensional:
-            series = series.reshape(series.shape[0], 1)
+        if is_multidimensional:
+            # A 1-D sax_type collapses to a single column, so a genuinely
+            # multi-column array would silently drop every column but the first.
+            # Reject it instead -- multi-dimensional input belongs to the
+            # 'repeat', 'energy', or 'independent' modes.
+            raise ValueError(
+                f"sax_type={sax_type!r} expects a 1-D series, but got a "
+                f"{series.shape[1]}-column array; use 'repeat', 'energy', or "
+                "'independent' for multi-dimensional input."
+            )
+        series = series.reshape(series.shape[0], 1)
 
     res = np.zeros((num_dims, paa_segment_size))
 
     for dim in range(num_dims):
-        # Check if we can evenly divide the series.
+        column = series[:, dim]
+        # PAA by averaging. These are the vectorized form of the original
+        # element-wise ``np.add.at`` scatter loops -- same arithmetic and
+        # summation order, but orders of magnitude faster on long series.
         if series_len % paa_segment_size == 0:
+            # Evenly divisible: average contiguous blocks of ``inc`` points.
             inc = series_len // paa_segment_size
-
-            for i in range(0, series_len):
-                idx = i // inc
-                np.add.at(res[dim], idx, np.mean(series[i][dim]))
-            res[dim] /= inc
-        # Process otherwise.
+            res[dim] = column.reshape(paa_segment_size, inc).mean(axis=1)
         else:
-            for i in range(0, paa_segment_size * series_len):
-                idx = i // series_len
-                pos = i // paa_segment_size
-                np.add.at(res[dim], idx, np.mean(series[pos][dim]))
-            res[dim] /= series_len
+            # Otherwise the classic expand-by-paa_size / contract-by-series_len
+            # construction, so segment boundaries can fall between samples.
+            res[dim] = (
+                np.repeat(column, paa_segment_size)
+                .reshape(paa_segment_size, series_len)
+                .mean(axis=1)
+            )
 
     if sax_type in ["repeat", "energy"]:
         return res.T
