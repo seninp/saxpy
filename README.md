@@ -7,6 +7,8 @@ Time series symbolic discretization with SAX
 This code is released under [GPL v.2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) and implements in Python:
   * Symbolic Aggregate approXimation (SAX) (with z-normalization and PAA) [1]
   * HOT-SAX - a time series anomaly (discord) discovery algorithm [3]
+  * RePair - a grammar-inference algorithm over the SAX representation
+  * RRA (Rare Rule Anomaly) - a grammar-based, variable-length discord discovery algorithm built on RePair
   * SAX-VSM - a SAX vector-space-model classifier
   * SAX-ENERGY - a multi-dimensional SAX that z-normalizes across data dimensions and aggregates the per-dimension energy. [4]
   * SAX-REPEAT - an extension to SAX for multi-dimensional time-series that performs standard SAX on individual dimensions, then clusters to map multi-dimensional words into strings from the required alphabet size. [4]
@@ -150,7 +152,7 @@ the result is represented as a data structure of resulting words and their respe
             {'aac': [4, 10, 11, 30, 35],
              'abc': [12, 14, 36, 44],
              'acb': [5, 16, 21, 37, 43],
-             'acc': [13, 52, 53],
+             'acc': [13, 52, 53, 54],
              'bac': [3, 19, 34, 45, 51],
              'bba': [31],
              'bbb': [15, 18, 20, 22, 25, 26, 27, 28, 29, 41, 42, 46],
@@ -199,9 +201,40 @@ which can be called as follows:
 
 	[(73, 6.198555329625453), (219, 5.5636923991016136)]
 
+Grammar inference with RePair
+------------
+Saxpy infers a RePair grammar from a space-delimited string of SAX words (or any tokens) via `str_to_repair_grammar`, which returns a dict mapping `rule_id` to a `RepairRule`. Rule 0 (R0) is the compressed top-level string:
+
+	from saxpy.repair import str_to_repair_grammar
+
+	g = str_to_repair_grammar("abc abc cba cba bac xxx abc abc cba cba bac")
+	g[0].rule_string          # 'R4 xxx R4'
+	g[4].expanded_rule_string # 'abc abc cba cba bac'
+
+Time series discord discovery with RRA
+------------
+The Rare Rule Anomaly (RRA) algorithm builds a RePair grammar over the SAX representation of a series, derives variable-length subsequences from the grammar rules, and searches them rarest-first. It is exposed as `find_discords_rra`:
+
+	import numpy as np
+	from numpy import genfromtxt
+	from saxpy.rra import find_discords_rra
+	dd = genfromtxt("data/ecg0606_1.csv", delimiter=',')
+	discords = find_discords_rra(dd, win_size=100, num_discords=2)
+	discords
+
+which returns a list of `RRADiscord` records (variable-length, with start/end positions and the nearest-neighbor distance):
+
+	[RRADiscord(rule_id=76, start=1722, end=1870, length=148, nn_distance=0.024067513139817164),
+	 RRADiscord(rule_id=3, start=407, end=508, length=101, nn_distance=0.016651923028144274)]
+
+The function signature is:
+
+	def find_discords_rra(series, win_size, paa_size=3, alphabet_size=3,
+	                      nr_strategy="none", znorm_threshold=0.01, num_discords=2)
+
 Time series motif discovery with EMMA
 ------------
-ToDo...
+ToDo... (EMMA is not yet implemented in saxpy; it is available in the sibling Java project.)
 
 ## Made with Aloha!
 ![Made with Aloha!](https://raw.githubusercontent.com/GrammarViz2/grammarviz2_src/master/src/resources/assets/aloha.jpg)
