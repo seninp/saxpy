@@ -6,10 +6,11 @@ Time series symbolic discretization with SAX
 
 This code is released under [GPL v.2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) and implements in Python:
   * Symbolic Aggregate approXimation (SAX) (with z-normalization and PAA) [1]
-  * EMMA -- an algorithm for time series motif discovery [2]
   * HOT-SAX - a time series anomaly (discord) discovery algorithm [3]
-  * SAX-ZSCORE - an extension to SAX for multi-dimensional time-series SAX that modifies the z-normalization to multi-dimensional sequences and PAA aggregation with the average along data-dimensions. [4]
+  * SAX-VSM - a SAX vector-space-model classifier
+  * SAX-ENERGY - a multi-dimensional SAX that z-normalizes across data dimensions and aggregates the per-dimension energy. [4]
   * SAX-REPEAT - an extension to SAX for multi-dimensional time-series that performs standard SAX on individual dimensions, then clusters to map multi-dimensional words into strings from the required alphabet size. [4]
+  * SAX-INDEPENDENT - a multi-dimensional SAX that SAX-encodes each dimension independently and concatenates the per-dimension words.
 
 
 Note that all of the library's functionality is also available in [R](https://github.com/jMotif/jmotif-R) and [Java](https://github.com/jMotif/SAX).
@@ -141,7 +142,7 @@ Typically, in order to investigate the input time series structure in order to d
 
 	sax_none = sax_via_window(dat, win_size=6, paa_size=3, alphabet_size=3, nr_strategy=None, znorm_threshold=0.01)
 
-	sax1
+	sax_none
 
 the result is represented as a data structure of resulting words and their respective positions on time series:
 
@@ -161,7 +162,7 @@ the result is represented as a data structure of resulting words and their respe
              'cbb': [33],
              'cca': [0, 1]})
 
-`sax_via_window` is parameterised with a sliding window size, desired PAA aggregation, alphabet size, a numerosity reduction strategy, z-normalization threshold, and a SAX type ('unidim' for unidimensional SAX (default), 'zscore' for SAX-ZSCORE, 'repeat' for SAX-REPEAT):
+`sax_via_window` is parameterised with a sliding window size, desired PAA aggregation, alphabet size, a numerosity reduction strategy, z-normalization threshold, and a SAX type (`'unidim'` for unidimensional SAX (default), and `'repeat'`, `'energy'`, or `'independent'` for multi-dimensional time series):
 
 	def sax_via_window(series, win_size, paa_size, alphabet_size=3,
                    nr_strategy='exact', znorm_threshold=0.01, sax_type='unidim')

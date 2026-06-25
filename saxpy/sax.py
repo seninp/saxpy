@@ -67,12 +67,11 @@ def ts_to_string(series, cuts):
 def is_mindist_zero(a, b):
     """Check mindist."""
     if len(a) != len(b):
-        return 0
-    else:
-        for i in range(0, len(b)):
-            if abs(ord(a[i]) - ord(b[i])) > 1:
-                return 0
-    return 1
+        return False
+    for i in range(0, len(b)):
+        if abs(ord(a[i]) - ord(b[i])) > 1:
+            return False
+    return True
 
 
 def sax_by_chunking(series, paa_size, alphabet_size=3, znorm_threshold=0.01):
@@ -233,7 +232,6 @@ def sax_via_window(
 
                     # PAA representation of energy distribution.
                     paa_rep = paa(energy_zn, paa_size, "unidim")
-                    # paa_rep = energy_zn
 
                     # SAX representation of the energy distribution.
                     energy_word = ts_to_string(paa_rep, cuts)

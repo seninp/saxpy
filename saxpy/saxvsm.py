@@ -11,7 +11,14 @@ def series_to_wordbag(
     series, win_size, paa_size, alphabet_size=3, nr_strategy="exact", znorm_threshold=0.01
 ):
     """VSM implementation."""
-    sax = sax_via_window(series, win_size, paa_size, alphabet_size, nr_strategy, znorm_threshold)
+    sax = sax_via_window(
+        series,
+        win_size,
+        paa_size,
+        alphabet_size=alphabet_size,
+        nr_strategy=nr_strategy,
+        znorm_threshold=znorm_threshold,
+    )
 
     # convert the dict to a wordbag
     frequencies = {}
@@ -67,7 +74,6 @@ def bags_to_tfidf(bags_dict):
 
     # compute tf*idf
     tfidf = {}  # the resulting vectors dictionary
-    idx = 0
     for word, freqs in counts.items():
         # document frequency
         df_counter = 0
@@ -90,8 +96,6 @@ def bags_to_tfidf(bags_dict):
             i_idx = i_idx + 1
 
         tfidf[word] = tf_idf
-
-        idx = idx + 1
 
     return {"vectors": tfidf, "classes": classes}
 
@@ -116,9 +120,9 @@ def cosine_measure(weight_vec, test_bag):
     sumxx, sumxy, sumyy = 0, 0, 0
     for word in set([*weight_vec.copy()]).union([*test_bag.copy()]):
         x, y = 0, 0
-        if word in weight_vec.keys():
+        if word in weight_vec:
             x = weight_vec[word]
-        if word in test_bag.keys():
+        if word in test_bag:
             y = test_bag[word]
         sumxx += x * x
         sumyy += y * y
@@ -134,7 +138,12 @@ def cosine_measure(weight_vec, test_bag):
 
 
 def cosine_similarity(tfidf, test_bag):
-    """VSM implementation."""
+    """Per-class cosine DISTANCE between ``test_bag`` and each class vector.
+
+    NOTE: despite the name this returns cosine *distance* (``1 - cosine``), not
+    similarity, so a smaller value means a closer match. ``class_for_bag``
+    relies on that by picking the class with the minimum value.
+    """
     res = {}
     for cls in tfidf["classes"]:
         res[cls] = 1.0 - cosine_measure(tfidf_to_vector(tfidf, cls), test_bag)

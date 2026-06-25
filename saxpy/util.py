@@ -25,7 +25,7 @@ def read_ucr_data(fname):
 
     res = {}
     for key, arr in data:
-        if key in res.keys():
+        if key in res:
             res[key].append(arr)
         else:
             dat = [arr]

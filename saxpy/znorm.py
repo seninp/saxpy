@@ -3,22 +3,6 @@
 import numpy as np
 
 
-def l2norm(array):
-    """
-    :param array: numpy array
-    :return: non-negative real indicating the L2-norm of the array.
-
-    >>> '%0.2f' % l2norm(np.array([1, 2, 3]))
-    '3.74'
-    >>> '%0.2f' % l2norm(np.array([1, 2, 3])[1])
-    '2.00'
-    >>> '%0.2f' % l2norm(np.array([1, 2, 3])[1:])
-    '3.61'
-    """
-
-    return np.sqrt(np.sum(np.square(array)))
-
-
 def znorm(series, znorm_threshold=0.01):
     """Znorm implementation.
 
