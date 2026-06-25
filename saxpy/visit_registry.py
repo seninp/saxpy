@@ -1,24 +1,40 @@
 """Keeps visited indexes in check."""
-import numpy as np
+
 import random
+
+import numpy as np
 
 
 class VisitRegistry:
-    """A straightforward visit array implementation."""
+    """Tracks unvisited indices with O(1) random selection and removal.
+
+    Backed by a dense list of the currently-unvisited indices plus a
+    value -> position map, so removal is O(1) (swap-with-last then pop) and a
+    random pick is O(1) (a list is directly indexable). The previous set-based
+    implementation rebuilt ``tuple(self.remaining)`` on every
+    ``get_next_unvisited`` call, turning a single drain into O(n^2) work (and
+    O(n^3) in the brute-force discord search, which drains a fresh inner
+    registry per outer index).
+    """
 
     def __init__(self, capacity=0):
         """Constructor."""
-        self.remaining = set()
-        for num in range(capacity):
-            self.remaining.add(num)
+        self._items = list(range(capacity))
+        self._pos = {value: i for i, value in enumerate(self._items)}
 
     def get_unvisited_count(self):
         """An unvisited count getter."""
-        return len(self.remaining)
+        return len(self._items)
 
     def mark_visited(self, index):
         """Set a single index as visited."""
-        self.remaining.discard(index)
+        i = self._pos.pop(index, None)
+        if i is None:
+            return
+        last = self._items.pop()
+        if i != len(self._items):
+            self._items[i] = last
+            self._pos[last] = i
 
     def mark_visited_range(self, start, stop):
         """Set a range as visited."""
@@ -26,14 +42,15 @@ class VisitRegistry:
             self.mark_visited(i)
 
     def get_next_unvisited(self):
-        """Next unvisited entry."""
-        if self.get_unvisited_count() == 0:
+        """A randomly chosen unvisited entry, or ``np.nan`` when none remain."""
+        if not self._items:
             return np.nan
 
-        return random.choice(tuple(self.remaining))
+        return random.choice(self._items)
 
     def clone(self):
-        """Make the array's copy."""
+        """Make the registry's copy."""
         clone = VisitRegistry()
-        clone.remaining = self.remaining.copy()
+        clone._items = self._items.copy()
+        clone._pos = self._pos.copy()
         return clone

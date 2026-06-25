@@ -1,23 +1,54 @@
 """Implements HOT-SAX."""
+
 import numpy as np
-from saxpy.znorm import znorm
-from saxpy.sax import sax_via_window
+
 from saxpy.distance import euclidean
+from saxpy.sax import sax_via_window
+from saxpy.znorm import znorm
 
 
-def find_discords_hotsax(series, win_size=100, num_discords=2, alphabet_size=3,
-                         paa_size=3, znorm_threshold=0.01, sax_type='unidim'):
-    """HOT-SAX-driven discords discovery."""
+def find_discords_hotsax(
+    series,
+    win_size=100,
+    num_discords=2,
+    alphabet_size=3,
+    paa_size=3,
+    znorm_threshold=0.01,
+    sax_type="unidim",
+):
+    """HOT-SAX-driven discords discovery.
+
+    The random-search phase shuffles candidate visit order (an early-abandoning
+    speed heuristic), but the returned discords are reproducible: a candidate's
+    nearest-neighbour distance is order-independent, and exact-distance ties are
+    broken deterministically on the lowest index. Results therefore do not
+    depend on the RNG and no seed argument is needed. (If you later want to
+    reproduce the search *trajectory* rather than just the result, thread an
+    optional ``random_state`` into the ``np.random.permutation`` call -- a small
+    follow-up.)
+    """
     discords = list()
 
     global_registry = set()
 
     # Z-normalized versions for every subsequence.
-    znorms = np.array([znorm(series[pos: pos + win_size], znorm_threshold) for pos in range(len(series) - win_size + 1)])
+    znorms = np.array(
+        [
+            znorm(series[pos : pos + win_size], znorm_threshold)
+            for pos in range(len(series) - win_size + 1)
+        ]
+    )
 
     # SAX words for every subsequence.
-    sax_data = sax_via_window(series, win_size=win_size, paa_size=paa_size, alphabet_size=alphabet_size,
-                              nr_strategy=None, znorm_threshold=0.01, sax_type=sax_type)
+    sax_data = sax_via_window(
+        series,
+        win_size=win_size,
+        paa_size=paa_size,
+        alphabet_size=alphabet_size,
+        nr_strategy=None,
+        znorm_threshold=znorm_threshold,
+        sax_type=sax_type,
+    )
 
     """[2.0] build the 'magic' array"""
     magic_array = list()
@@ -28,8 +59,9 @@ def find_discords_hotsax(series, win_size=100, num_discords=2, alphabet_size=3,
     magic_array = sorted(magic_array, key=lambda tup: tup[1])
 
     while len(discords) < num_discords:
-
-        best_discord = find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_array, znorms)
+        best_discord = find_best_discord_hotsax(
+            series, win_size, global_registry, sax_data, magic_array, znorms
+        )
 
         if -1 == best_discord[0]:
             break
@@ -50,7 +82,7 @@ def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_
 
     """[3.0] define the key vars"""
     best_so_far_position = -1
-    best_so_far_distance = 0.
+    best_so_far_distance = 0.0
 
     distance_calls = 0
 
@@ -58,7 +90,6 @@ def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_
 
     """[4.0] and we are off iterating over the magic array entries"""
     for entry in magic_array:
-
         """[5.0] current SAX words and the number of other sequences mapping to the same SAX word."""
         curr_word = entry[0]
         occurrences = sax_data[curr_word]
@@ -67,7 +98,6 @@ def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_
         nail down the possibly small distance value -- so we can be efficient
         and all that..."""
         for curr_pos in occurrences:
-
             if curr_pos in global_registry:
                 continue
 
@@ -85,7 +115,6 @@ def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_
 
             """[10.0] ordered by occurrences search first"""
             for next_pos in occurrences:
-
                 """[11.0] skip bad pos"""
                 if next_pos in visit_set:
                     continue
@@ -110,7 +139,7 @@ def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_
                 """[14.0] build that random visit order array"""
                 curr_idx = 0
                 for i in range(0, (len(series) - win_size + 1)):
-                    if not(i in visit_set):
+                    if i not in visit_set:
                         visit_array[curr_idx] = i
                         curr_idx += 1
                 it_order = np.random.permutation(visit_array[0:curr_idx])
@@ -131,10 +160,14 @@ def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_
                         nn_dist = dist
                         break
 
-            """[17.0] and BIGGER books"""
-            if (nn_dist > best_so_far_distance) and (nn_dist < np.inf):
+            """[17.0] and BIGGER books -- tie-break on the lowest position so
+            the result matches find_discords_brute_force and never depends on
+            visit order"""
+            if nn_dist < np.inf and (
+                nn_dist > best_so_far_distance
+                or (nn_dist == best_so_far_distance and curr_pos < best_so_far_position)
+            ):
                 best_so_far_distance = nn_dist
                 best_so_far_position = curr_pos
 
     return best_so_far_position, best_so_far_distance
-  

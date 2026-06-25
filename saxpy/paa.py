@@ -1,9 +1,9 @@
 """Implements PAA."""
-from __future__ import division
+
 import numpy as np
 
 
-def paa(series, paa_segment_size, sax_type='unidim'):
+def paa(series, paa_segment_size, sax_type="unidim"):
     """PAA implementation.
 
     >>> paa([1, 2, 3], 3, 'unidim')
@@ -22,7 +22,20 @@ def paa(series, paa_segment_size, sax_type='unidim'):
     series = np.array(series)
     series_len = series.shape[0]
 
-    if sax_type in ['repeat', 'energy']:
+    # PAA reduces a series to fewer segments by averaging; reject inputs that
+    # make that ill-defined instead of failing cryptically (ZeroDivisionError /
+    # all-NaN) or silently up-sampling.
+    if paa_segment_size < 1:
+        raise ValueError("PAA segment size must be a positive integer.")
+    if series_len == 0:
+        raise ValueError("Cannot run PAA on an empty series.")
+    if paa_segment_size > series_len:
+        raise ValueError(
+            "PAA segment size cannot exceed the series length; "
+            "PAA reduces a series, it does not up-sample it."
+        )
+
+    if sax_type in ["repeat", "energy"]:
         num_dims = series.shape[1]
     else:
         num_dims = 1
@@ -49,7 +62,7 @@ def paa(series, paa_segment_size, sax_type='unidim'):
                 np.add.at(res[dim], idx, np.mean(series[pos][dim]))
             res[dim] /= series_len
 
-    if sax_type in ['repeat', 'energy']:
+    if sax_type in ["repeat", "energy"]:
         return res.T
     else:
         return res.flatten()

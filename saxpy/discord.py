@@ -1,22 +1,35 @@
 """Discord discovery routines."""
+
 import numpy as np
-from saxpy.visit_registry import VisitRegistry
+
 from saxpy.distance import early_abandoned_euclidean
+from saxpy.visit_registry import VisitRegistry
 from saxpy.znorm import znorm
 
 
 def find_discords_brute_force(series, win_size, num_discords=2, znorm_threshold=0.01):
-    """Early-abandoned distance-based discord discovery."""
+    """Early-abandoned distance-based discord discovery.
+
+    The search visits candidates in a random order (for early-abandoning
+    efficiency), but the returned discords are reproducible: each candidate's
+    nearest-neighbour distance is order-independent, and exact-distance ties are
+    broken deterministically on the lowest index. So results do not depend on
+    the RNG and no seed argument is needed. (If you later want to reproduce the
+    search *trajectory* rather than just the result, thread an optional
+    ``random_state`` through here into ``VisitRegistry`` -- a small follow-up.)
+    """
     discords = list()
 
     globalRegistry = VisitRegistry(len(series) - win_size + 1)
-    znorms = np.array([znorm(series[pos: pos + win_size], znorm_threshold) for pos in range(len(series) - win_size + 1)])
+    znorms = np.array(
+        [
+            znorm(series[pos : pos + win_size], znorm_threshold)
+            for pos in range(len(series) - win_size + 1)
+        ]
+    )
 
     while len(discords) < num_discords:
-
-        bestDiscord = find_best_discord_brute_force(series, win_size,
-                                                    globalRegistry,
-                                                    znorms)
+        bestDiscord = find_best_discord_brute_force(series, win_size, globalRegistry, znorms)
 
         if -1 == bestDiscord[0]:
             break
@@ -41,7 +54,6 @@ def find_best_discord_brute_force(series, win_size, global_registry, znorms):
     outer_idx = outer_registry.get_next_unvisited()
 
     while ~np.isnan(outer_idx):
-
         outer_registry.mark_visited(outer_idx)
 
         candidate_seq = znorms[outer_idx]
@@ -55,7 +67,6 @@ def find_best_discord_brute_force(series, win_size, global_registry, znorms):
             inner_registry.mark_visited(inner_idx)
 
             if abs(inner_idx - outer_idx) >= win_size:
-
                 curr_seq = znorms[inner_idx]
 
                 dist = early_abandoned_euclidean(candidate_seq, curr_seq, nn_distance)
@@ -65,7 +76,13 @@ def find_best_discord_brute_force(series, win_size, global_registry, znorms):
 
             inner_idx = inner_registry.get_next_unvisited()
 
-        if ~(np.inf == nn_distance) and (nn_distance > best_so_far_distance):
+        # Tie-break deterministically on the lowest index: the per-index NN
+        # distance is order-independent, so without this the winner among
+        # equal-distance candidates would depend on the random visit order.
+        if nn_distance < np.inf and (
+            nn_distance > best_so_far_distance
+            or (nn_distance == best_so_far_distance and outer_idx < best_so_far_index)
+        ):
             best_so_far_distance = nn_distance
             best_so_far_index = outer_idx
 

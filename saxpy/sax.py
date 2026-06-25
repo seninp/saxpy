@@ -1,11 +1,26 @@
 """Converts a normlized timeseries to SAX symbols."""
+
 from collections import defaultdict
-from saxpy.strfunc import idx2letter
-from saxpy.znorm import znorm
-from saxpy.paa import paa
-from saxpy.alphabet import cuts_for_asize
+
 import numpy as np
 from sklearn.cluster import KMeans
+
+from saxpy.alphabet import cuts_for_asize
+from saxpy.paa import paa
+from saxpy.strfunc import idx2letter
+from saxpy.znorm import znorm
+
+
+def _symbol_index(num, cuts):
+    """Map a value to its alphabet index given the breakpoint array ``cuts``.
+
+    ``cuts`` starts with ``-inf`` and has one entry per symbol, so the canonical
+    SAX assignment (Lin et al. 2003) is the largest index ``i`` with
+    ``cuts[i] <= num`` -- i.e. a value sitting exactly on a breakpoint belongs to
+    the symbol *above* it. ``searchsorted(side='right') - 1`` computes exactly
+    that and is symmetric across zero, unlike the old sign-based inward walk.
+    """
+    return int(np.searchsorted(cuts, num, side="right") - 1)
 
 
 # For SAX-REPEAT.
@@ -16,7 +31,6 @@ def get_sax_list(series, cuts):
     """
 
     series = np.array(series)
-    a_size = len(cuts)
     multidim_sax_list = []
 
     for i in range(series.shape[0]):
@@ -24,18 +38,7 @@ def get_sax_list(series, cuts):
 
         for j in range(series.shape[1]):
             num = series[i][j]
-
-            # If the number is below 0, start from the bottom, otherwise from the top
-            if num >= 0:
-                j = a_size - 1
-                while j > 0 and cuts[j] >= num:
-                    j = j - 1
-                multidim_sax.append(j)
-            else:
-                j = 1
-                while j < a_size and cuts[j] <= num:
-                    j = j + 1
-                multidim_sax.append(j - 1)
+            multidim_sax.append(_symbol_index(num, cuts))
 
         multidim_sax_list.append(multidim_sax)
 
@@ -53,26 +56,12 @@ def ts_to_string(series, cuts):
     """
 
     series = np.array(series)
-    a_size = len(cuts)
     sax = list()
 
     for i in range(series.shape[0]):
-        num = series[i]
+        sax.append(idx2letter(_symbol_index(series[i], cuts)))
 
-        # If the number is below 0, start from the bottom, otherwise from the top
-        if num >= 0:
-            j = a_size - 1
-            while j > 0 and cuts[j] >= num:
-
-                j = j - 1
-            sax.append(idx2letter(j))
-        else:
-            j = 1
-            while j < a_size and cuts[j] <= num:
-                j = j + 1
-            sax.append(idx2letter(j-1))
-
-    return ''.join(sax)
+    return "".join(sax)
 
 
 def is_mindist_zero(a, b):
@@ -93,8 +82,15 @@ def sax_by_chunking(series, paa_size, alphabet_size=3, znorm_threshold=0.01):
     return ts_to_string(paa_rep, cuts)
 
 
-def sax_via_window(series, win_size, paa_size, alphabet_size=3,
-                   nr_strategy='exact', znorm_threshold=0.01, sax_type='unidim'):
+def sax_via_window(
+    series,
+    win_size,
+    paa_size,
+    alphabet_size=3,
+    nr_strategy="exact",
+    znorm_threshold=0.01,
+    sax_type="unidim",
+):
     """Simple via window conversion implementation.
 
     # SAX-ENERGY
@@ -134,14 +130,16 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
 
     # Check on dimensions.
     if len(series.shape) > 2:
-        raise ValueError('Please reshape time-series to stack dimensions along the 2nd dimension, so that the array shape is a 2-tuple.')
+        raise ValueError(
+            "Please reshape time-series to stack dimensions along the 2nd dimension, so that the array shape is a 2-tuple."
+        )
 
     # PAA size is the length of the PAA sequence.
-    if sax_type != 'energy' and paa_size > win_size:
-        raise ValueError('PAA size cannot be greater than the window size.')
+    if sax_type != "energy" and paa_size > win_size:
+        raise ValueError("PAA size cannot be greater than the window size.")
 
-    if sax_type == 'energy' and len(series.shape) == 1:
-        raise ValueError('Must pass a multidimensional time-series to SAX-ENERGY.')
+    if sax_type == "energy" and len(series.shape) == 1:
+        raise ValueError("Must pass a multidimensional time-series to SAX-ENERGY.")
 
     # Breakpoints.
     cuts = cuts_for_asize(alphabet_size)
@@ -149,7 +147,7 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
     # Dictionary mapping SAX words to indices.
     sax = defaultdict(list)
 
-    if sax_type == 'repeat':
+    if sax_type == "repeat":
         # Maps indices to multi-dimensional SAX words.
         multidim_sax_dict = []
 
@@ -158,9 +156,8 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
 
         # Sliding window across time dimension.
         for i in range(series.shape[0] - win_size + 1):
-
             # Subsection starting at this index.
-            sub_section = series[i: i + win_size]
+            sub_section = series[i : i + win_size]
 
             # Z-normalized subsection.
             if win_size == 1:
@@ -169,7 +166,7 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
                 zn = znorm(sub_section, znorm_threshold)
 
             # PAA representation of subsection.
-            paa_rep = paa(zn, paa_size, 'repeat')
+            paa_rep = paa(zn, paa_size, "repeat")
 
             # SAX representation of subsection, but in terms of multi-dimensional vectors.
             multidim_sax = get_sax_list(paa_rep, cuts)
@@ -185,17 +182,19 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
         order = np.lexsort(np.rot90(kmeans.cluster_centers_))
 
         # Sliding window across time dimension.
-        prev_word = ''
+        prev_word = ""
         for i in range(series.shape[0] - win_size + 1):
-
             # Map cluster indices to new SAX letters.
-            curr_word_list = map(lambda cluster_index: idx2letter(order[cluster_index]), kmeans.predict(multidim_sax_dict[i]))
-            curr_word = ''.join(curr_word_list)
+            curr_word_list = map(
+                lambda cluster_index: idx2letter(order[cluster_index]),
+                kmeans.predict(multidim_sax_dict[i]),
+            )
+            curr_word = "".join(curr_word_list)
 
-            if '' != prev_word:
-                if 'exact' == nr_strategy and prev_word == curr_word:
+            if "" != prev_word:
+                if "exact" == nr_strategy and prev_word == curr_word:
                     continue
-                elif 'mindist' == nr_strategy and is_mindist_zero(prev_word, curr_word):
+                elif "mindist" == nr_strategy and is_mindist_zero(prev_word, curr_word):
                     continue
 
             prev_word = curr_word
@@ -204,20 +203,19 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
 
     else:
         # Sliding window across time dimension.
-        prev_word = ''
+        prev_word = ""
         for i in range(series.shape[0] - win_size + 1):
-
             # Subsection starting at this index.
-            sub_section = series[i: i + win_size]
+            sub_section = series[i : i + win_size]
 
-            if sax_type == 'energy':
-                curr_word = ''
+            if sax_type == "energy":
+                curr_word = ""
                 for energy_dist in sub_section:
                     # Normalize energy distribution.
                     energy_zn = znorm(energy_dist, znorm_threshold)
 
                     # PAA representation of energy distribution.
-                    paa_rep = paa(energy_zn, paa_size, 'unidim')
+                    paa_rep = paa(energy_zn, paa_size, "unidim")
                     # paa_rep = energy_zn
 
                     # SAX representation of the energy distribution.
@@ -226,17 +224,23 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
                     # Add to current word.
                     curr_word += energy_word
 
-            elif sax_type == 'independent':
-                curr_word = ''
+            elif sax_type == "independent":
+                curr_word = ""
                 for dim in range(sub_section.shape[1]):
                     # Obtain the subsequence restricted to one dimension.
                     one_dimension_sub_section = sub_section[:, dim]
 
-                    # Z-normalized subsection.
-                    zn = znorm(one_dimension_sub_section, znorm_threshold)
+                    # Z-normalized subsection. A single time point (win_size==1)
+                    # has no variance, so znorm would collapse it to 0 (the
+                    # middle letter) and destroy all information; skip it as the
+                    # 'repeat' branch already does.
+                    if win_size == 1:
+                        zn = one_dimension_sub_section
+                    else:
+                        zn = znorm(one_dimension_sub_section, znorm_threshold)
 
                     # PAA representation of subsection.
-                    paa_rep = paa(zn, paa_size, 'unidim')
+                    paa_rep = paa(zn, paa_size, "unidim")
 
                     # Get the SAX word - just a unidimensional SAX.
                     one_dim_word = ts_to_string(paa_rep, cuts)
@@ -245,8 +249,14 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
                     curr_word += one_dim_word
 
             else:
-                # Z-normalized subsection.
-                zn = znorm(sub_section, znorm_threshold)
+                # Z-normalized subsection. A single time point (win_size==1)
+                # has no variance, so znorm would collapse it to 0 (the middle
+                # letter) and destroy all information; skip it as the 'repeat'
+                # branch already does.
+                if win_size == 1:
+                    zn = sub_section
+                else:
+                    zn = znorm(sub_section, znorm_threshold)
 
                 # PAA representation of subsection.
                 paa_rep = paa(zn, paa_size, sax_type)
@@ -254,10 +264,10 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
                 # SAX representation of subsection.
                 curr_word = ts_to_string(paa_rep, cuts)
 
-            if '' != prev_word:
-                if 'exact' == nr_strategy and prev_word == curr_word:
+            if "" != prev_word:
+                if "exact" == nr_strategy and prev_word == curr_word:
                     continue
-                elif 'mindist' == nr_strategy and is_mindist_zero(prev_word, curr_word):
+                elif "mindist" == nr_strategy and is_mindist_zero(prev_word, curr_word):
                     continue
 
             prev_word = curr_word
@@ -265,4 +275,3 @@ def sax_via_window(series, win_size, paa_size, alphabet_size=3,
             sax[curr_word].append(i)
 
     return sax
-

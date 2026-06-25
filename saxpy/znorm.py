@@ -1,9 +1,6 @@
 """Implements znorm."""
 
-from __future__ import division
 import numpy as np
-from scipy.linalg import sqrtm
-from scipy.linalg import inv
 
 
 def l2norm(array):
@@ -42,20 +39,24 @@ def znorm(series, znorm_threshold=0.01):
     original_series_shape = series.shape
     is_multidimensional = (len(series.shape) > 1) and (series.shape[1] > 1)
     mu = np.average(series, axis=0)
-    C = np.cov(series, bias=True, rowvar=not is_multidimensional)
 
     # Only update those subsequences with variance over the threshold.
     if is_multidimensional:
+        C = np.diagonal(np.cov(series, bias=True, rowvar=False))
         series = series - mu
-        C = np.diagonal(C)
-        indexes = (C >= np.square(znorm_threshold))
-        series[:, indexes] = (series[:, indexes] / np.sqrt(C[indexes]))
+        indexes = C >= np.square(znorm_threshold)
+        series[:, indexes] = series[:, indexes] / np.sqrt(C[indexes])
     else:
+        # Population variance over the sample axis. Using np.var rather than
+        # np.cov(..., rowvar=True) keeps a 2-D column vector (n, 1) univariate:
+        # np.cov on an (n, 1) array returns an (n, n) matrix, which made the
+        # scalar threshold test raise "truth value ambiguous".
+        C = np.var(series, axis=0)
         series = series - mu
-        if C >= np.square(znorm_threshold):
-            series /= np.sqrt(C)
+        if np.all(C >= np.square(znorm_threshold)):
+            series = series / np.sqrt(C)
 
     # Check on shape returned.
-    assert(series.shape == original_series_shape)
+    assert series.shape == original_series_shape
 
     return series

@@ -1,14 +1,17 @@
 """Implements VSM."""
+
 import math
+
 import numpy as np
+
 from saxpy.sax import sax_via_window
 
 
-def series_to_wordbag(series, win_size, paa_size, alphabet_size=3,
-                      nr_strategy='exact', z_threshold=0.01):
+def series_to_wordbag(
+    series, win_size, paa_size, alphabet_size=3, nr_strategy="exact", znorm_threshold=0.01
+):
     """VSM implementation."""
-    sax = sax_via_window(series, win_size, paa_size, alphabet_size,
-                         nr_strategy, z_threshold)
+    sax = sax_via_window(series, win_size, paa_size, alphabet_size, nr_strategy, znorm_threshold)
 
     # convert the dict to a wordbag
     frequencies = {}
@@ -17,15 +20,21 @@ def series_to_wordbag(series, win_size, paa_size, alphabet_size=3,
     return frequencies
 
 
-def manyseries_to_wordbag(series_npmatrix, win_size, paa_size, alphabet_size=3,
-                          nr_strategy='exact', z_threshold=0.01):
+def manyseries_to_wordbag(
+    series_npmatrix, win_size, paa_size, alphabet_size=3, nr_strategy="exact", znorm_threshold=0.01
+):
     """VSM implementation."""
     frequencies = {}
 
     for row in series_npmatrix:
-        tmp_freq = series_to_wordbag(np.squeeze(np.asarray(row)),
-                                     win_size, paa_size, alphabet_size,
-                                     nr_strategy, z_threshold)
+        tmp_freq = series_to_wordbag(
+            np.squeeze(np.asarray(row)),
+            win_size,
+            paa_size,
+            alphabet_size,
+            nr_strategy,
+            znorm_threshold,
+        )
         for k, v in tmp_freq.items():
             if k in frequencies:
                 frequencies[k] += v
@@ -60,7 +69,6 @@ def bags_to_tfidf(bags_dict):
     tfidf = {}  # the resulting vectors dictionary
     idx = 0
     for word, freqs in counts.items():
-
         # document frequency
         df_counter = 0
         for i in freqs:
@@ -90,14 +98,17 @@ def bags_to_tfidf(bags_dict):
 
 def tfidf_to_vector(tfidf, vector_label):
     """VSM implementation."""
-    if vector_label in tfidf['classes']:
-        idx = tfidf['classes'].index(vector_label)
+    if vector_label in tfidf["classes"]:
+        idx = tfidf["classes"].index(vector_label)
         weight_vec = {}
-        for word, weights in tfidf['vectors'].items():
+        for word, weights in tfidf["vectors"].items():
             weight_vec[word] = weights[idx]
         return weight_vec
     else:
-        return []
+        # Unknown label -> empty weight vector (not a [] sentinel, which would
+        # crash cosine_measure's `.keys()` access). An empty dict yields a zero
+        # norm there, i.e. cosine 0 / maximal distance for an unknown class.
+        return {}
 
 
 def cosine_measure(weight_vec, test_bag):
@@ -112,14 +123,21 @@ def cosine_measure(weight_vec, test_bag):
         sumxx += x * x
         sumyy += y * y
         sumxy += x * y
-    return sumxy / math.sqrt(sumxx * sumyy)
+    # Guard the norm: an empty/non-overlapping test bag or an all-zero class
+    # vector (e.g. every word dismissed by idf) makes a norm zero. Treat that as
+    # zero cosine -> distance 1.0 under the 1 - cosine convention, rather than
+    # crashing the whole classification with ZeroDivisionError.
+    denom = math.sqrt(sumxx * sumyy)
+    if denom == 0:
+        return 0.0
+    return sumxy / denom
 
 
 def cosine_similarity(tfidf, test_bag):
     """VSM implementation."""
     res = {}
-    for cls in tfidf['classes']:
-        res[cls] = 1. - cosine_measure(tfidf_to_vector(tfidf, cls), test_bag)
+    for cls in tfidf["classes"]:
+        res[cls] = 1.0 - cosine_measure(tfidf_to_vector(tfidf, cls), test_bag)
 
     return res
 
