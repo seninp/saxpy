@@ -30,11 +30,20 @@ to floating-point precision. The shared conventions are:
   * **PAA uses fractional segment boundaries** (a sample straddling a segment
     edge is split by overlap);
   * **a value exactly on a breakpoint maps to the symbol above** the cut;
-  * **discord search z-normalizes the subsequences** and breaks distance ties by
-    the lowest index, so results are reproducible regardless of search order.
+  * **all distance-based discord search z-normalizes the subsequences** — HOT-SAX,
+    brute-force, *and* RRA compare z-normalized (shape, not amplitude) windows;
+    HOT-SAX and brute-force additionally break distance ties by the lowest index,
+    so their results are reproducible regardless of search order.
 
-The only residual cross-language difference is single-symbol noise for PAA
-values that fall within floating-point rounding of a breakpoint — benign and
+RRA agrees with the other implementations on the discord *region* (e.g. the
+ecg0606 anomaly at position 430), but its reported `nn_distance` is a
+search-order-dependent *approximation*: RRA's rarest-first search early-abandons
+as soon as a close-enough neighbour is found, so the exact distance value (not
+the position) can differ by a few percent between implementations whose random
+visit orders differ. This is inherent to the heuristic, not a convention gap.
+
+The only residual SAX-stack cross-language difference is single-symbol noise for
+PAA values that fall within floating-point rounding of a breakpoint — benign and
 expected. saxpy is the reference implementation for these conventions.
 
 
@@ -244,8 +253,14 @@ The Rare Rule Anomaly (RRA) algorithm builds a RePair grammar over the SAX repre
 
 which returns a list of `RRADiscord` records (variable-length, with start/end positions and the nearest-neighbor distance):
 
-	[RRADiscord(rule_id=76, start=1722, end=1870, length=148, nn_distance=0.024067513139817164),
-	 RRADiscord(rule_id=3, start=407, end=508, length=101, nn_distance=0.016651923028144274)]
+	[RRADiscord(rule_id=76, start=1722, end=1870, length=148, nn_distance=0.05577536309246554),
+	 RRADiscord(rule_id=35, start=430, end=531, length=101, nn_distance=0.05258209490111305)]
+
+The `nn_distance` is computed between **z-normalized** subsequences (so RRA keys
+on shape, like HOT-SAX); because the rarest-first search early-abandons as soon
+as a sufficiently close neighbour is found, the reported `nn_distance` is a
+search-order-dependent *approximation* of the true nearest-neighbour distance,
+not its exact value. The discord *positions* are stable.
 
 The function signature is:
 
