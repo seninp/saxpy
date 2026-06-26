@@ -22,6 +22,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from saxpy.paa import paa as _paa
 from saxpy.repair import str_to_repair_grammar
 from saxpy.sax import sax_via_window
 
@@ -40,39 +41,24 @@ class RRADiscord:
 def _paa2(ts, paa_num):
     """Fractional-boundary PAA used by RRA's length-normalizing distance.
 
-    Distinct from :func:`saxpy.paa.paa`: segment boundaries may fall between
-    samples, with the straddling samples weighted by the fractional overlap
-    (a port of the C++ ``_paa2``). Used only to rescale the longer of two
-    unequal-length subsequences down to the shorter length, so ``paa_num`` is
-    always ``<= len(ts)`` here.
+    This is exactly :func:`saxpy.paa.paa` (overlap-weighted / fractional-boundary
+    PAA): boundaries may fall between samples, and straddling samples are
+    weighted by their fractional overlap. RRA uses it only to rescale the longer
+    of two unequal-length subsequences down to the shorter length, so ``paa_num``
+    is always ``<= len(ts)`` here.
+
+    It delegates to ``saxpy.paa.paa`` -- the standalone loop this used to carry
+    was a port of the C++ ``_paa2`` that (a) spent ~95% of ``find_discords_rra``'s
+    runtime in tiny per-segment NumPy calls and (b) dropped the final sample when
+    ``len/paa_num`` rounded just past an integer (the float-boundary bug the C++
+    later fixed by snapping the last break to ``len``). ``saxpy.paa`` is the
+    vectorized, correct fractional PAA and matches the C++ reference, so RRA now
+    reuses it rather than maintaining a second copy.
     """
     ts = np.asarray(ts, dtype=float)
-    n = len(ts)
-    if n < paa_num:
+    if len(ts) < paa_num:
         raise ValueError("'paa_num' size is invalid")
-    if n == paa_num:
-        return ts.copy()
-
-    res = np.zeros(paa_num)
-    points_per_segment = n / paa_num
-    breaks = [i * points_per_segment for i in range(paa_num + 1)]
-
-    for i in range(paa_num):
-        seg_start = breaks[i]
-        seg_end = breaks[i + 1]
-        frac_begin = np.ceil(seg_start) - seg_start
-        frac_end = seg_end - np.floor(seg_end)
-        full_begin = int(np.floor(seg_start))
-        full_end = int(np.ceil(seg_end))
-        if full_end > n:
-            full_end = n
-        segment = ts[full_begin:full_end].copy()
-        if frac_begin > 0:
-            segment[0] = segment[0] * frac_begin
-        if frac_end > 0:
-            segment[-1] = segment[-1] * frac_end
-        res[i] = segment.sum() / points_per_segment
-    return res
+    return _paa(ts, paa_num)
 
 
 def _normalized_distance(start1, end1, start2, end2, series):

@@ -81,27 +81,22 @@ def test_paa2_matches_reference():
     np.testing.assert_array_equal(_paa2([3.0, 1.0, 4.0], 3), [3.0, 1.0, 4.0])
 
 
-def test_paa2_differs_from_saxpy_paa():
-    """_paa2 (fractional segment boundaries, jmotif's public paa/_paa2) must stay
-    separate from saxpy.paa (integer boundaries, jmotif's deprecated _paa).
+def test_paa2_equals_saxpy_paa():
+    """_paa2 IS saxpy.paa -- both are overlap-weighted fractional-boundary PAA.
 
-    They COINCIDE on evenly-divisible or linear inputs, so a discriminating case
-    needs non-linear, non-divisible data. The differential audit confirmed
-    saxpy.paa implements the integer-boundary _paa, not _paa2; this pins that
-    they must not be conflated. Expected values are from the jmotif C++ paa()
-    (== _paa2) vs saxpy.paa on a 5-point series reduced to 3 segments.
+    RRA's _paa2 used to carry its own loop (a port of the C++ _paa2) that, before
+    the C++ snapped the final break to ``len``, dropped the last sample when
+    ``len/paa_num`` rounded just past an integer. That bug was the *only* reason
+    _paa2 ever differed from saxpy.paa; the predecessor test pinned the bug. _paa2
+    now delegates to saxpy.paa, so this pins that they agree, including on the
+    non-divisible 29->7 case whose mid-sample boundaries exercise the fraction.
     """
     from saxpy.paa import paa
 
-    # 29 points -> 7 segments: segment boundaries fall mid-sample, so the
-    # fractional-weighting of _paa2 diverges from the whole-sample _paa.
     series = np.random.RandomState(1).randn(29)
-    frac = _paa2(list(series), 7)  # jmotif public paa() == _paa2
-    integer = paa(list(series), 7)  # jmotif deprecated _paa
-    assert not np.allclose(frac, integer)
-    # The last segment is where they differ; _paa2 matches jmotif's paa().
-    assert frac[-1] == pytest.approx(-0.389514, abs=1e-5)
-    assert integer[-1] == pytest.approx(-0.454179, abs=1e-5)
+    np.testing.assert_allclose(_paa2(list(series), 7), paa(list(series), 7), atol=1e-12)
+    # Pinned against jmotif's C++ paa() (== _paa2 with the boundary fix).
+    assert _paa2(list(series), 7)[-1] == pytest.approx(-0.454175, abs=1e-5)
 
 
 def test_normalized_distance_equal_length():
