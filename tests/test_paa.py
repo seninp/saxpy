@@ -103,9 +103,7 @@ def test_paa_multidim_energy_and_repeat():
     the implementation. Each column is PAA'd separately and the result is
     (paa_size x num_dims).
     """
-    series = np.array(
-        [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15]], dtype=float
-    )
+    series = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15]], dtype=float)
     # Non-divisible: 5 rows -> 2 segments. Column 0 = [1,4,7,10,13]:
     #   seg0 = (2*1 + 2*4 + 1*7) / 5 = 3.4, seg1 = (1*7 + 2*10 + 2*13) / 5 = 10.6
     expected = np.array([[3.4, 4.4, 5.4], [10.6, 11.6, 12.6]])

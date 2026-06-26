@@ -364,9 +364,7 @@ def str_to_repair_grammar(s):
         )
         expanded = left + " " + right
 
-        rule = RepairRule(
-            rule_id=rule_id, rule_string=rule_string, expanded_rule_string=expanded
-        )
+        rule = RepairRule(rule_id=rule_id, rule_string=rule_string, expanded_rule_string=expanded)
         rules[rule_id] = rule
 
         # Insertion-ordered set: a plain Python ``set`` would iterate in an
