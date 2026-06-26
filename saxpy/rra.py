@@ -25,6 +25,7 @@ import numpy as np
 from saxpy.paa import paa as _paa
 from saxpy.repair import str_to_repair_grammar
 from saxpy.sax import sax_via_window
+from saxpy.znorm import znorm
 
 
 @dataclass
@@ -61,13 +62,17 @@ def _paa2(ts, paa_num):
     return _paa(ts, paa_num)
 
 
-def _normalized_distance(start1, end1, start2, end2, series):
-    """Per-point normalized Euclidean distance between two raw subsequences.
+def _normalized_distance(start1, end1, start2, end2, series, znorm_threshold=0.01):
+    """Per-point normalized Euclidean distance between two subsequences.
 
-    Operates on the RAW series (not z-normed). When the two spans differ in
-    length, the longer is PAA-reduced (via :func:`_paa2`) to the shorter length
-    first. The result is ``sqrt(sum of squared diffs) / count`` -- divided by the
-    number of compared points, so spans of different lengths are comparable.
+    Both subsequences are **z-normalized** before the distance is taken, so the
+    comparison is of shape, not amplitude/offset -- the same convention used by
+    :func:`saxpy.hotsax.find_discords_hotsax` and
+    :func:`saxpy.discord.find_discords_brute_force` (and by the canonical jMotif
+    GrammarViz RRA). When the two spans differ in length, the longer is first
+    PAA-reduced (via :func:`_paa2`) to the shorter length. The result is
+    ``euclidean(znorm(a), znorm(b)) / count`` -- divided by the number of
+    compared points so spans of different lengths stay comparable.
     """
     len1 = end1 - start1
     len2 = end2 - start2
@@ -75,21 +80,25 @@ def _normalized_distance(start1, end1, start2, end2, series):
     if len1 == len2:
         a = series[start1:end1]
         b = series[start2:end2]
-        diff = a - b
-        return float(np.sqrt(np.dot(diff, diff)) / len1)
-
-    min_length = min(len1, len2)
-    if len1 == min_length:
-        shorter = series[start1:end1]
-        longer_paa = _paa2(series[start2:end2], len1)
     else:
-        shorter = series[start2:end2]
-        longer_paa = _paa2(series[start1:end1], len2)
-    diff = shorter - longer_paa
-    return float(np.sqrt(np.dot(diff, diff)) / min_length)
+        min_length = min(len1, len2)
+        if len1 == min_length:
+            a = series[start1:end1]
+            b = _paa2(series[start2:end2], len1)
+        else:
+            a = series[start2:end2]
+            b = _paa2(series[start1:end1], len2)
+
+    count = min(len1, len2)
+    diff = znorm(np.asarray(a, dtype=float), znorm_threshold) - znorm(
+        np.asarray(b, dtype=float), znorm_threshold
+    )
+    return float(np.sqrt(np.dot(diff, diff)) / count)
 
 
-def _find_best_rra_discord(series, win_size, grammar, indexes, intervals, global_visited, rng):
+def _find_best_rra_discord(
+    series, win_size, grammar, indexes, intervals, global_visited, rng, znorm_threshold=0.01
+):
     """Find the single farthest-nearest-neighbour rule interval (one discord)."""
     best_position = -1
     best_length = -1
@@ -118,7 +127,7 @@ def _find_best_rra_discord(series, win_size, grammar, indexes, intervals, global
                 continue
             visited.add(start)
             end = indexes[occ_end] + win_size
-            dist = _normalized_distance(c.start, c.end, start, end, series)
+            dist = _normalized_distance(c.start, c.end, start, end, series, znorm_threshold)
             if dist < nn_distance:
                 nn_distance = dist
             if dist < best_distance:
@@ -132,7 +141,9 @@ def _find_best_rra_discord(series, win_size, grammar, indexes, intervals, global
             rng.shuffle(candidates)
             for j in candidates:
                 ri = intervals[j]
-                dist = _normalized_distance(c.start, c.end, ri.start, ri.end, series)
+                dist = _normalized_distance(
+                    c.start, c.end, ri.start, ri.end, series, znorm_threshold
+                )
                 if dist < best_distance:
                     nn_distance = dist
                     break
@@ -276,7 +287,7 @@ def find_discords_rra(
 
     while len(discords) < num_discords:
         d = _find_best_rra_discord(
-            series, win_size, grammar, indexes, intervals, global_visited, rng
+            series, win_size, grammar, indexes, intervals, global_visited, rng, znorm_threshold
         )
         if d.nn_distance < 0:
             break

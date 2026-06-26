@@ -23,21 +23,27 @@ def _ecg():
 
 
 def test_rra_finds_ecg_anomaly():
-    """The top discord must cover the known ecg0606 anomaly near position 420
-    (mirrors the jmotif test_discord_rra.R and the saxpy HOT-SAX test)."""
+    """The top discord must cover the known ecg0606 anomaly near position 430.
+
+    With z-normalized RRA distance (matching HOT-SAX and the canonical jMotif
+    GrammarViz RRA), the top discord is the variable-length region beginning at
+    the anomaly (~430), mirroring the saxpy HOT-SAX result (pos 430)."""
     discords = find_discords_rra(_ecg(), 100, 4, 4, num_discords=4)
     assert len(discords) >= 1
     top = discords[0]
-    assert top.start < 420 < top.end
+    # The discord spans the anomaly near 430; allow the region to begin at it.
+    assert top.start <= 430 < top.end
 
 
 def test_rra_agrees_with_hotsax_region():
     """RRA and HOT-SAX must identify the same primary anomaly region -- an
-    independent cross-check between two different discord algorithms."""
+    independent cross-check between two different discord algorithms. With
+    z-normed distances both land on the same window start (430), so HOT-SAX's
+    position falls within ``[rra.start, rra.end)``."""
     ecg = _ecg()
     rra = find_discords_rra(ecg, 100, 4, 4, num_discords=1)
     hot = find_discords_hotsax(ecg, win_size=100, num_discords=1, paa_size=4, alphabet_size=4)
-    assert rra[0].start < hot[0][0] < rra[0].end
+    assert rra[0].start <= hot[0][0] < rra[0].end
 
 
 def test_rra_is_deterministic():
@@ -99,11 +105,22 @@ def test_paa2_equals_saxpy_paa():
     assert _paa2(list(series), 7)[-1] == pytest.approx(-0.454175, abs=1e-5)
 
 
-def test_normalized_distance_equal_length():
-    """Equal-length spans: sqrt(sum of squared diffs) / count."""
-    series = np.array([0.0, 0.0, 0.0, 3.0, 4.0, 0.0])
-    # compare [0:2]=(0,0) with [3:5]=(3,4): dist = sqrt(9+16)/2 = 5/2
-    assert _normalized_distance(0, 2, 3, 5, series) == pytest.approx(2.5)
+def test_normalized_distance_znorms_operands():
+    """Equal-length spans are z-normalized before the Euclidean / count.
+
+    Two spans that are identical up to scale+offset have the SAME z-normalized
+    shape, so their normalized distance is ~0 -- the whole point of z-norming
+    (detect shape anomalies, not amplitude). [10,20,30] and [1,2,3] are both the
+    linear ramp; raw distance would be large, z-normed distance is zero."""
+    series = np.array([10.0, 20.0, 30.0, 1.0, 2.0, 3.0])
+    assert _normalized_distance(0, 3, 3, 6, series) == pytest.approx(0.0, abs=1e-12)
+
+
+def test_normalized_distance_differs_for_different_shapes():
+    """Different shapes give a positive z-normed distance."""
+    series = np.array([1.0, 2.0, 3.0, 3.0, 1.0, 2.0])
+    d = _normalized_distance(0, 3, 3, 6, series)
+    assert d > 0 and np.isfinite(d)
 
 
 def test_normalized_distance_is_symmetric_in_length_handling():
