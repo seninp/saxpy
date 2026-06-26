@@ -17,6 +17,26 @@ This code is released under [GPL v.2.0](https://www.gnu.org/licenses/old-license
 
 Note that all of the library's functionality is also available in [R](https://github.com/jMotif/jmotif-R) and [Java](https://github.com/jMotif/SAX).
 
+#### Cross-implementation alignment
+
+The Python (saxpy), R, and Java implementations are kept aligned: the SAX
+stack — z-normalization, PAA, Gaussian breakpoints, symbol assignment — and the
+HOT-SAX / brute-force discord search produce the same results across all three
+to floating-point precision. The shared conventions are:
+
+  * **z-normalization uses the population standard deviation** (divide by `n`),
+    matching the Matrix Profile / MASS convention, so each window has empirical
+    variance exactly 1 (the assumption behind SAX's equiprobable breakpoints);
+  * **PAA uses fractional segment boundaries** (a sample straddling a segment
+    edge is split by overlap);
+  * **a value exactly on a breakpoint maps to the symbol above** the cut;
+  * **discord search z-normalizes the subsequences** and breaks distance ties by
+    the lowest index, so results are reproducible regardless of search order.
+
+The only residual cross-language difference is single-symbol noise for PAA
+values that fall within floating-point rounding of a breakpoint — benign and
+expected. saxpy is the reference implementation for these conventions.
+
 
 ## References
 [1] Lin, J., Keogh, E., Patel, P., and Lonardi, S.,
