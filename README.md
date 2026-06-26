@@ -240,6 +240,18 @@ Saxpy infers a RePair grammar from a space-delimited string of SAX words (or any
 	g[0].rule_string          # 'R4 xxx R4'
 	g[4].expanded_rule_string # 'abc abc cba cba bac'
 
+RePair is **lossless** and the grammar is structurally equivalent across the R,
+Python, and Java implementations: decompressing R0 always reproduces the input,
+and R0 ends up with no repeated digram. RePair works by repeatedly replacing the
+*most frequent* digram with a new rule; when several digrams share the maximal
+frequency, *which one is replaced first* is an implementation detail (saxpy
+follows Python dict insertion order, the C++/R port follows `unordered_map`
+iteration, Java uses its priority queue). On tie-heavy inputs this can change the
+**rule numbering** and which equal-frequency pair is factored — so the rule ids
+and even the rule count may differ slightly between implementations — but the
+compression is correct in all of them and the set of rules is determined by the
+input. Treat `rule_id` as implementation-local, not a cross-language identifier.
+
 Time series discord discovery with RRA
 ------------
 The Rare Rule Anomaly (RRA) algorithm builds a RePair grammar over the SAX representation of a series, derives variable-length subsequences from the grammar rules, and searches them rarest-first. It is exposed as `find_discords_rra`:
