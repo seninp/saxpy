@@ -25,7 +25,6 @@ import numpy as np
 from saxpy.paa import paa as _paa
 from saxpy.repair import str_to_repair_grammar
 from saxpy.sax import sax_via_window
-from saxpy.znorm import znorm
 
 
 @dataclass
@@ -62,7 +61,27 @@ def _paa2(ts, paa_num):
     return _paa(ts, paa_num)
 
 
-def _normalized_distance(start1, end1, start2, end2, series, znorm_threshold=0.01):
+def _fast_znorm(x, znorm_threshold):
+    """Lightweight 1-D z-normalization, numerically identical to
+    :func:`saxpy.znorm.znorm` on a 1-D array but without its shape/multidim
+    bookkeeping.
+
+    Centers the series, and scales by the *population* standard deviation only
+    when the variance is at or above ``znorm_threshold**2`` (matching znorm's
+    "center but don't amplify flat/noise segments" behavior). RRA evaluates this
+    on the order of N^2 times, each on a short (~window-length) array, so the
+    per-call overhead of the general ``znorm`` (np.array/np.cov/np.var +
+    assertions) dominated runtime -- this avoids it.
+    """
+    x = np.asarray(x, dtype=float)
+    xc = x - x.mean()
+    var = np.dot(xc, xc) / len(xc)  # population variance (== np.var, ddof=0)
+    if var >= znorm_threshold * znorm_threshold:
+        xc = xc / np.sqrt(var)
+    return xc
+
+
+def _normalized_distance(start1, end1, start2, end2, series, znorm_threshold=0.01, ref_znorm=None):
     """Per-point normalized Euclidean distance between two subsequences.
 
     Both subsequences are **z-normalized** before the distance is taken, so the
@@ -73,26 +92,33 @@ def _normalized_distance(start1, end1, start2, end2, series, znorm_threshold=0.0
     PAA-reduced (via :func:`_paa2`) to the shorter length. The result is
     ``euclidean(znorm(a), znorm(b)) / count`` -- divided by the number of
     compared points so spans of different lengths stay comparable.
+
+    ``ref_znorm`` is an optional precomputed z-norm of the FIRST subsequence
+    (``series[start1:end1]`` at full length). The caller may pass it to avoid
+    re-z-normalizing a fixed reference across many candidate comparisons; it is
+    only valid (and only used) when subsequence 1 is the shorter-or-equal of the
+    pair, i.e. it is compared at its full length.
     """
     len1 = end1 - start1
     len2 = end2 - start2
 
-    if len1 == len2:
-        a = series[start1:end1]
-        b = series[start2:end2]
+    if len1 <= len2:
+        # subsequence 1 is used at full length; the longer (2) is PAA-reduced.
+        za = (
+            ref_znorm
+            if ref_znorm is not None
+            else _fast_znorm(series[start1:end1], znorm_threshold)
+        )
+        b = series[start2:end2] if len1 == len2 else _paa2(series[start2:end2], len1)
+        zb = _fast_znorm(b, znorm_threshold)
+        count = len1
     else:
-        min_length = min(len1, len2)
-        if len1 == min_length:
-            a = series[start1:end1]
-            b = _paa2(series[start2:end2], len1)
-        else:
-            a = series[start2:end2]
-            b = _paa2(series[start1:end1], len2)
+        # subsequence 1 is the longer one, so it is PAA-reduced to len2.
+        za = _fast_znorm(_paa2(series[start1:end1], len2), znorm_threshold)
+        zb = _fast_znorm(series[start2:end2], znorm_threshold)
+        count = len2
 
-    count = min(len1, len2)
-    diff = znorm(np.asarray(a, dtype=float), znorm_threshold) - znorm(
-        np.asarray(b, dtype=float), znorm_threshold
-    )
+    diff = za - zb
     return float(np.sqrt(np.dot(diff, diff)) / count)
 
 
@@ -120,6 +146,11 @@ def _find_best_rra_discord(
         nn_distance = np.inf
         do_random_search = True
 
+        # The reference interval c is fixed for this whole iteration and is
+        # always compared at its full length, so z-normalize it ONCE and reuse
+        # it across every candidate (avoids re-z-norming it thousands of times).
+        c_znorm = _fast_znorm(series[c.start : c.end], znorm_threshold)
+
         # Search same-rule occurrences first (likely close), early-abandoning.
         for occ_start, occ_end in grammar[c.rule_id].intervals:
             start = indexes[occ_start]
@@ -127,7 +158,9 @@ def _find_best_rra_discord(
                 continue
             visited.add(start)
             end = indexes[occ_end] + win_size
-            dist = _normalized_distance(c.start, c.end, start, end, series, znorm_threshold)
+            dist = _normalized_distance(
+                c.start, c.end, start, end, series, znorm_threshold, ref_znorm=c_znorm
+            )
             if dist < nn_distance:
                 nn_distance = dist
             if dist < best_distance:
@@ -142,7 +175,7 @@ def _find_best_rra_discord(
             for j in candidates:
                 ri = intervals[j]
                 dist = _normalized_distance(
-                    c.start, c.end, ri.start, ri.end, series, znorm_threshold
+                    c.start, c.end, ri.start, ri.end, series, znorm_threshold, ref_znorm=c_znorm
                 )
                 if dist < best_distance:
                     nn_distance = dist
