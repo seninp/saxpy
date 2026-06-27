@@ -287,6 +287,17 @@ def find_discords_rra(
 
     # Uncovered (zero-coverage) stretches become their own rule_id == -1
     # candidate intervals -- these are the most anomalous by construction.
+    #
+    # Skip DEGENERATE runs shorter than paa_size: a length-1 (or sub-segment)
+    # uncovered stretch is not a discoverable variable-length subsequence, and it
+    # is numerically pathological -- comparing any span to a length-1 interval
+    # PAA-reduces both to a single point, which _fast_znorm mean-centers to 0,
+    # making the distance 0 to *everything*. Such an interval otherwise becomes a
+    # spurious nn=0 "discord" and (because it poisons the best-so-far distance to
+    # ~0) defeats the early-abandon, inflating the distance-call count by ~20x.
+    # A common trigger: position 0 when RePair leaves the first SAX word as a
+    # bare terminal in R0, leaving a single uncovered point.
+    min_uncovered = max(2, paa_size)
     zero_rule = grammar.get(-1)
     if zero_rule is None:
         from saxpy.repair import RepairRule
@@ -299,9 +310,10 @@ def find_discords_rra(
             start = i
             in_interval = True
         elif coverage[i] > 0 and in_interval:
-            intervals.append(_Interval(rule_id=-1, start=start, end=i))
-            zero_rule.occurrences.append(start)
-            zero_rule.intervals.append((start, i))
+            if i - start >= min_uncovered:
+                intervals.append(_Interval(rule_id=-1, start=start, end=i))
+                zero_rule.occurrences.append(start)
+                zero_rule.intervals.append((start, i))
             in_interval = False
     if zero_rule.intervals:
         grammar[-1] = zero_rule
