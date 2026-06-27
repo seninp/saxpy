@@ -309,10 +309,26 @@ def find_discords_rra(
     if not intervals:
         return []
 
-    # Coverage of each interval = mean coverage over its span; sort rare first.
+    # Order the candidate intervals "rarest first" so the early-abandoning
+    # nearest-neighbour search establishes a strong best-so-far distance quickly.
+    #
+    # Rarity key: RULE FREQUENCY -- how many times this interval's grammar rule
+    # occurs (a rule seen once is, by construction, the most anomalous pattern).
+    # This matches the canonical jMotif GrammarViz (Java) RRA. ``iv.cover`` is
+    # still populated (mean per-point coverage) for reference/inspection.
+    #
+    # NOTE -- alternative ordering: mean per-point COVERAGE (how many rules
+    # overlap each point of the span). saxpy/jmotif-R historically sorted by this.
+    # It is a local-density measure rather than a pattern-rarity one, and the two
+    # are nearly uncorrelated (Spearman ~ -0.09 on ecg308): coverage tends to
+    # surface series-edge / sparse-neighbourhood intervals, whereas rule frequency
+    # surfaces genuinely once-occurring patterns. To use coverage instead, swap
+    # the sort key below for ``iv.cover``:
+    #     intervals.sort(key=lambda iv: iv.cover)
+    rule_frequency = {rid: len(rule.intervals) for rid, rule in grammar.items()}
     for iv in intervals:
         iv.cover = float(coverage[iv.start : iv.end].mean())
-    intervals.sort(key=lambda iv: iv.cover)
+    intervals.sort(key=lambda iv: rule_frequency.get(iv.rule_id, 0))
 
     rng = random.Random(0)
     global_visited = set()
