@@ -30,3 +30,15 @@ benchmarks/*poptiplex*.json
 benchmarks/repair_design_full.json
 benchmarks/repair_optimization_*.md
 benchmarks/repair_oracle*.txt
+
+# Benchmark reports + cross-impl study (research/work product — kept on the
+# local-only `reports-local` branch, not published with the OSS library).
+saxpy_benchmark_report.html
+benchmarks/report.html
+benchmarks/repair_sequitur_eli5.html
+benchmarks/IMPL_COMPARISON.md
+benchmarks/rcpp_rra_coverage_key_BASELINE.md
+benchmarks/saxpy_bothfixes_calls.json
+benchmarks/sequitur_java_profile.json
+benchmarks/recompute_*.md
+benchmarks/cross_machine_eval_*.json
