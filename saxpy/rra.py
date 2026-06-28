@@ -214,6 +214,7 @@ def find_discords_rra(
     nr_strategy="none",
     znorm_threshold=0.01,
     num_discords=2,
+    random_state=0,
 ):
     """Find discords (anomalies) with the Rare Rule Anomaly algorithm.
 
@@ -232,6 +233,12 @@ def find_discords_rra(
             keeps every window so positions stay contiguous.
         znorm_threshold: the z-normalization variance threshold.
         num_discords: how many discords to report.
+        random_state: seed for the phase-2 shuffle that orders the
+            nearest-neighbour search. Defaults to ``0`` so RRA is deterministic
+            out of the box (historical behavior). Pass any int -- or a
+            ``random.Random`` -- to choose a different reproducible trajectory,
+            or ``None`` for an unseeded one. Only the distance-call count and
+            search order depend on it; the reported discords do not.
 
     Returns:
         A list of :class:`RRADiscord`, ordered by discovery (most anomalous
@@ -342,7 +349,7 @@ def find_discords_rra(
         iv.cover = float(coverage[iv.start : iv.end].mean())
     intervals.sort(key=lambda iv: rule_frequency.get(iv.rule_id, 0))
 
-    rng = random.Random(0)
+    rng = random_state if isinstance(random_state, random.Random) else random.Random(random_state)
     global_visited = set()
     discords = []
 

@@ -17,10 +17,19 @@ class VisitRegistry:
     registry per outer index).
     """
 
-    def __init__(self, capacity=0):
-        """Constructor."""
+    def __init__(self, capacity=0, rng=None):
+        """Constructor.
+
+        ``rng`` is an optional ``random.Random`` instance used by
+        :meth:`get_next_unvisited`. When ``None`` the module-global ``random``
+        is used (the historical, unseeded behavior). Pass a seeded
+        ``random.Random`` to make the visit order -- and hence the
+        early-abandoning search trajectory and its distance-call count --
+        reproducible. The discord *result* is order-independent either way.
+        """
         self._items = list(range(capacity))
         self._pos = {value: i for i, value in enumerate(self._items)}
+        self._rng = rng
 
     def get_unvisited_count(self):
         """An unvisited count getter."""
@@ -46,11 +55,13 @@ class VisitRegistry:
         if not self._items:
             return np.nan
 
-        return random.choice(self._items)
+        chooser = self._rng if self._rng is not None else random
+        return chooser.choice(self._items)
 
     def clone(self):
-        """Make the registry's copy."""
+        """Make the registry's copy (sharing the same ``rng`` instance)."""
         clone = VisitRegistry()
         clone._items = self._items.copy()
         clone._pos = self._pos.copy()
+        clone._rng = self._rng
         return clone

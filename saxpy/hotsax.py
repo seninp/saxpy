@@ -15,6 +15,7 @@ def find_discords_hotsax(
     alphabet_size=3,
     znorm_threshold=0.01,
     sax_type="unidim",
+    random_state=None,
 ):
     """HOT-SAX-driven discords discovery.
 
@@ -27,11 +28,20 @@ def find_discords_hotsax(
     speed heuristic), but the returned discords are reproducible: a candidate's
     nearest-neighbour distance is order-independent, and exact-distance ties are
     broken deterministically on the lowest index. Results therefore do not
-    depend on the RNG and no seed argument is needed. (If you later want to
-    reproduce the search *trajectory* rather than just the result, thread an
-    optional ``random_state`` into the ``np.random.permutation`` call -- a small
-    follow-up.)
+    depend on the RNG.
+
+    ``random_state`` makes the search *trajectory* reproducible too: pass an int
+    (or a ``numpy.random.Generator``) to seed the shuffle, so the distance-call
+    count is deterministic run-to-run. The default ``None`` keeps the historical
+    unseeded behavior (a fresh, independently-seeded generator each call; the
+    visit order, and only the visit order, is nondeterministic). The returned
+    discords are identical either way.
     """
+    rng = (
+        random_state
+        if isinstance(random_state, np.random.Generator)
+        else np.random.default_rng(random_state)
+    )
     discords = list()
 
     global_registry = set()
@@ -65,7 +75,7 @@ def find_discords_hotsax(
 
     while len(discords) < num_discords:
         best_discord = find_best_discord_hotsax(
-            series, win_size, global_registry, sax_data, magic_array, znorms
+            series, win_size, global_registry, sax_data, magic_array, znorms, rng
         )
 
         if -1 == best_discord[0]:
@@ -82,8 +92,17 @@ def find_discords_hotsax(
     return discords
 
 
-def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_array, znorms):
-    """Find the best discord with hotsax."""
+def find_best_discord_hotsax(
+    series, win_size, global_registry, sax_data, magic_array, znorms, rng=None
+):
+    """Find the best discord with hotsax.
+
+    ``rng`` is an optional ``numpy.random.Generator`` for the random-search
+    shuffle; ``None`` falls back to the global ``numpy.random`` (historical
+    behavior).
+    """
+    if rng is None:
+        rng = np.random
 
     """[3.0] define the key vars"""
     best_so_far_position = -1
@@ -154,7 +173,7 @@ def find_best_discord_hotsax(series, win_size, global_registry, sax_data, magic_
                     if i not in visit_set:
                         visit_array[curr_idx] = i
                         curr_idx += 1
-                it_order = np.random.permutation(visit_array[0:curr_idx])
+                it_order = rng.permutation(visit_array[0:curr_idx])
                 curr_idx -= 1
 
                 """[15.0] and go random"""

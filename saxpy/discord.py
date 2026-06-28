@@ -1,5 +1,7 @@
 """Discord discovery routines."""
 
+import random
+
 import numpy as np
 
 from saxpy.distance import early_abandoned_euclidean
@@ -7,20 +9,28 @@ from saxpy.visit_registry import VisitRegistry
 from saxpy.znorm import znorm
 
 
-def find_discords_brute_force(series, win_size, num_discords=2, znorm_threshold=0.01):
+def find_discords_brute_force(
+    series, win_size, num_discords=2, znorm_threshold=0.01, random_state=None
+):
     """Early-abandoned distance-based discord discovery.
 
     The search visits candidates in a random order (for early-abandoning
     efficiency), but the returned discords are reproducible: each candidate's
     nearest-neighbour distance is order-independent, and exact-distance ties are
     broken deterministically on the lowest index. So results do not depend on
-    the RNG and no seed argument is needed. (If you later want to reproduce the
-    search *trajectory* rather than just the result, thread an optional
-    ``random_state`` through here into ``VisitRegistry`` -- a small follow-up.)
+    the RNG.
+
+    ``random_state`` makes the search *trajectory* reproducible too: pass an
+    int (or a ``random.Random``) to seed the visit order, so the distance-call
+    count is deterministic run-to-run. The default ``None`` preserves the
+    historical unseeded behavior. The returned discords are identical either
+    way -- the seed only affects how quickly the early-abandon fires.
     """
+    rng = random_state if isinstance(random_state, random.Random) else random.Random(random_state)
+
     discords = list()
 
-    globalRegistry = VisitRegistry(len(series) - win_size + 1)
+    globalRegistry = VisitRegistry(len(series) - win_size + 1, rng=rng)
     znorms = np.array(
         [
             znorm(series[pos : pos + win_size], znorm_threshold)
@@ -59,7 +69,7 @@ def find_best_discord_brute_force(series, win_size, global_registry, znorms):
         candidate_seq = znorms[outer_idx]
 
         nn_distance = np.inf
-        inner_registry = VisitRegistry(len(series) - win_size + 1)
+        inner_registry = VisitRegistry(len(series) - win_size + 1, rng=global_registry._rng)
 
         inner_idx = inner_registry.get_next_unvisited()
 
