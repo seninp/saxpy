@@ -19,3 +19,14 @@ jupyter/.ipynb*
 /.venv/
 /.vscode/
 .idea/
+
+# Internal benchmarking/process artifacts — keep local, do not publish
+# (infra-specific logs, the working plan, design/oracle scratch).
+benchmarks/PLAN.md
+benchmarks/RESULTS.md
+benchmarks/*_5950x.json
+benchmarks/*_5950x.log
+benchmarks/*poptiplex*.json
+benchmarks/repair_design_full.json
+benchmarks/repair_optimization_*.md
+benchmarks/repair_oracle*.txt
