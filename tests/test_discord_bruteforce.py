@@ -39,6 +39,29 @@ def test_discord_distance_precision():
     )
 
 
+def test_vectorized_brute_force_matches_hotsax_on_full_ecg():
+    """The vectorized brute force computes each candidate's *exact* NN distance,
+    so on real data it must agree with HOT-SAX (which is also exact) on both the
+    discord positions and their distances."""
+    from saxpy.hotsax import find_discords_hotsax
+
+    dd = np.genfromtxt("data/ecg0606_1.csv", delimiter=",")
+    brute = find_discords_brute_force(dd, 100, num_discords=2)
+    hot = find_discords_hotsax(dd, win_size=100, num_discords=2, paa_size=3, alphabet_size=3)
+    assert [idx for idx, _ in brute] == [idx for idx, _ in hot] == [430, 318]
+    np.testing.assert_allclose([d for _, d in brute], [d for _, d in hot], rtol=0, atol=1e-9)
+
+
+def test_random_state_is_inert():
+    """random_state is kept for backward compatibility but no longer affects the
+    result or the search (exact NN is computed for every candidate)."""
+    dd = np.genfromtxt("data/ecg0606_1.csv", delimiter=",")
+    a = find_discords_brute_force(dd[0:400], 100, 3, random_state=0)
+    b = find_discords_brute_force(dd[0:400], 100, 3, random_state=12345)
+    c = find_discords_brute_force(dd[0:400], 100, 3, random_state=None)
+    assert a == b == c
+
+
 def test_tie_break_is_deterministic_across_seeds():
     """Regression (audit #16): the unseeded VisitRegistry RNG used to make the
     winning discord index nondeterministic whenever two windows shared the

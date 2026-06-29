@@ -33,6 +33,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/seninp/saxpy"
 Repository = "https://github.com/seninp/saxpy"
+Changelog = "https://github.com/seninp/saxpy/blob/master/CHANGELOG.md"
 
 [dependency-groups]
 dev = [
@@ -45,6 +46,15 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["saxpy"]
+
+# Lean source distribution: only the package and the user-facing docs/metadata.
+# Hatchling's sdist target otherwise globs the whole working directory, so it is
+# pinned with an explicit allowlist; tests and example datasets stay in the repo
+# for development and CI rather than the release sdist. `.gitignore` is
+# force-included by Hatchling regardless of only-include, so it is excluded.
+[tool.hatch.build.targets.sdist]
+only-include = ["saxpy", "README.md", "LICENSE", "CHANGELOG.md", "pyproject.toml"]
+exclude = [".gitignore"]
 
 [tool.ruff]
 target-version = "py310"

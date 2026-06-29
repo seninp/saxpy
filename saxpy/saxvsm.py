@@ -51,8 +51,31 @@ def manyseries_to_wordbag(
     return frequencies
 
 
-def bags_to_tfidf(bags_dict):
-    """VSM implementation."""
+def _term_frequency(count, tf_scheme):
+    """Term-frequency weighting for a single (word, class) raw ``count``.
+
+    Cross-implementation note: SAX-VSM impls historically disagree on the TF
+    transform. ``log1p`` (``ln(1 + tf)``) is what saxpy and jmotif-R use;
+    ``smart`` (``1 + ln(tf)``, the SMART ``ltc`` log-TF) is what the Java
+    ``sax-vsm_classic`` of the 2013 paper uses. They are not a uniform scalar of
+    each other, so they can change which class wins; ``log1p`` is the saxpy/R
+    default. The IDF base (``ln`` here) is a uniform per-word factor and is
+    cosine-invariant, so it never affects classification.
+    """
+    if tf_scheme == "log1p":
+        return np.log(1 + count)
+    if tf_scheme == "smart":
+        return 1.0 + np.log(count)
+    raise ValueError(f"unknown tf_scheme {tf_scheme!r}; expected 'log1p' or 'smart'")
+
+
+def bags_to_tfidf(bags_dict, tf_scheme="log1p"):
+    """Compute TF*IDF weight vectors for a set of word bags.
+
+    ``tf_scheme`` selects the term-frequency transform (``"log1p"`` =
+    ``ln(1 + tf)``, the saxpy/jmotif-R default; ``"smart"`` = ``1 + ln(tf)``,
+    the Java ``sax-vsm_classic`` paper scheme). See :func:`_term_frequency`.
+    """
 
     # classes
     count_size = len(bags_dict)
@@ -90,7 +113,7 @@ def bags_to_tfidf(bags_dict):
         i_idx = 0
         for i in freqs:
             if i != 0:
-                tf = np.log(1 + i)
+                tf = _term_frequency(i, tf_scheme)
                 idf = np.log(len(freqs) / df_counter)
                 tf_idf[i_idx] = tf * idf
             i_idx = i_idx + 1
@@ -137,12 +160,12 @@ def cosine_measure(weight_vec, test_bag):
     return sumxy / denom
 
 
-def cosine_similarity(tfidf, test_bag):
-    """Per-class cosine DISTANCE between ``test_bag`` and each class vector.
+def cosine_distance(tfidf, test_bag):
+    """Per-class cosine *distance* (``1 - cosine``) between ``test_bag`` and each
+    class vector.
 
-    NOTE: despite the name this returns cosine *distance* (``1 - cosine``), not
-    similarity, so a smaller value means a closer match. ``class_for_bag``
-    relies on that by picking the class with the minimum value.
+    A smaller value means a closer match, so :func:`class_for_bag` picks the
+    class with the minimum value.
     """
     res = {}
     for cls in tfidf["classes"]:
@@ -151,6 +174,147 @@ def cosine_similarity(tfidf, test_bag):
     return res
 
 
-def class_for_bag(similarity_dict):
-    # do i need to take care about equal values?
-    return min(similarity_dict, key=lambda x: similarity_dict[x])
+def cosine_similarity(tfidf, test_bag):
+    """Deprecated alias for :func:`cosine_distance`.
+
+    Despite the name this returns cosine *distance* (``1 - cosine``), not
+    similarity. The function was published under this misleading name; it is
+    kept as an alias for backward compatibility and may be removed in a future
+    release. Prefer :func:`cosine_distance`.
+    """
+    return cosine_distance(tfidf, test_bag)
+
+
+def class_for_bag(distance_dict):
+    """Return the label with the smallest cosine distance (the best match).
+
+    ``distance_dict`` is the per-class mapping from :func:`cosine_distance`.
+    """
+    return min(distance_dict, key=lambda x: distance_dict[x])
+
+
+# ---------------------------------------------------------------------------
+# Convenience classifier layer (train / classify) + UCR data loader.
+#
+# These compose the building blocks above into a runnable SAX-VSM classifier,
+# matching the Java sax-vsm_classic (SAXVSMClassifier) and jmotif-R README §5.0
+# walkthroughs. The pipeline is: per-class word bags -> TF*IDF class vectors;
+# classify a new series by the largest cosine similarity (smallest 1 - cosine).
+# ---------------------------------------------------------------------------
+
+
+def load_ucr_data(path):
+    """Load a UCR/jMotif text dataset into ``{label: [np.ndarray, ...]}``.
+
+    The format (shared by the jMotif Java/R demos) is one series per line:
+    a class label in column 0, then the series values, whitespace- or
+    comma-separated. Labels are returned as strings (e.g. ``"1"``); a numeric
+    label like ``1.0000000e+000`` is normalized to its integer string ``"1"``.
+    Mirrors ``net.seninp.util.UCRUtils.readUCRData``.
+    """
+    data = {}
+    with open(path) as fh:
+        for line in fh:
+            parts = [p for p in line.replace(",", " ").split() if p]
+            if not parts:
+                continue
+            label = parts[0]
+            try:
+                label = str(int(round(float(label))))
+            except ValueError:
+                pass
+            values = np.array([float(x) for x in parts[1:]])
+            data.setdefault(label, []).append(values)
+    return data
+
+
+def train_tfidf(
+    labeled_data,
+    win_size,
+    paa_size,
+    alphabet_size=3,
+    nr_strategy="exact",
+    znorm_threshold=0.01,
+    tf_scheme="log1p",
+):
+    """Train SAX-VSM class vectors from labeled training series.
+
+    ``labeled_data`` maps each class label to a sequence of training series
+    (as returned by :func:`load_ucr_data`). Each class becomes one merged word
+    bag (:func:`manyseries_to_wordbag`); the bags are then TF*IDF-weighted
+    (:func:`bags_to_tfidf`). Returns the tfidf structure ready for
+    :func:`classify_series`.
+    """
+    bags = {
+        label: manyseries_to_wordbag(
+            np.asarray(series_list),
+            win_size,
+            paa_size,
+            alphabet_size,
+            nr_strategy,
+            znorm_threshold,
+        )
+        for label, series_list in labeled_data.items()
+    }
+    return bags_to_tfidf(bags, tf_scheme=tf_scheme)
+
+
+def classify_series(
+    series,
+    tfidf,
+    win_size,
+    paa_size,
+    alphabet_size=3,
+    nr_strategy="exact",
+    znorm_threshold=0.01,
+):
+    """Predict the class label of one series against trained TF*IDF vectors.
+
+    The series is converted to a word bag (same SAX transform as training) and
+    assigned to the class with the largest cosine similarity. If every class
+    ties (e.g. a non-overlapping bag yields an all-zero similarity vector) the
+    result is ambiguous and ``None`` is returned -- mirroring the Java
+    classifier, which counts an all-equal result as a (forced) misclassification
+    rather than letting dict order pick a winner.
+    """
+    test_bag = series_to_wordbag(
+        series, win_size, paa_size, alphabet_size, nr_strategy, znorm_threshold
+    )
+    distances = cosine_distance(tfidf, test_bag)
+    if len(set(distances.values())) <= 1:
+        return None
+    return class_for_bag(distances)
+
+
+def classification_accuracy(
+    test_data,
+    tfidf,
+    win_size,
+    paa_size,
+    alphabet_size=3,
+    nr_strategy="exact",
+    znorm_threshold=0.01,
+):
+    """Fraction of ``test_data`` series classified correctly.
+
+    ``test_data`` is a ``{label: [series, ...]}`` mapping like the training
+    data. Each series is classified with :func:`classify_series`; an ambiguous
+    (``None``) prediction counts as incorrect.
+    """
+    correct = 0
+    total = 0
+    for true_label, series_list in test_data.items():
+        for series in series_list:
+            predicted = classify_series(
+                np.squeeze(np.asarray(series)),
+                tfidf,
+                win_size,
+                paa_size,
+                alphabet_size,
+                nr_strategy,
+                znorm_threshold,
+            )
+            if predicted == true_label:
+                correct += 1
+            total += 1
+    return correct / total if total else 0.0
