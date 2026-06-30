@@ -51,7 +51,7 @@ SAX transforms a sequence of rational numbers (i.e., a time series) into a seque
 
 ![SAX in a nutshell](https://raw.githubusercontent.com/jMotif/SAX/master/src/resources/sax_transform.png)
 
-As discretization is probably the most used transformation in data mining, SAX has been widely used throughout the field. Find more information about SAX at its authors' pages: [SAX overview by Jessica Lin](http://cs.gmu.edu/~jessica/sax.htm), [Eamonn Keogh's SAX page](http://www.cs.ucr.edu/~eamonn/SAX.htm), or at the [sax-vsm wiki page](http://jmotif.github.io/sax-vsm_site/morea/algorithm/SAX.html).
+As discretization is probably the most used transformation in data mining, SAX has been widely used throughout the field. Find more information about SAX at its authors' pages: [SAX overview by Jessica Lin](http://cs.gmu.edu/~jessica/sax.htm), [Eamonn Keogh's SAX page](http://www.cs.ucr.edu/~eamonn/SAX.htm), or at the [sax-vsm wiki page](https://jmotif.github.io/sax-vsm_site/algorithm/sax/).
 
 #### 1.0 Simple time series to SAX conversion
 To convert a time series of an arbitrary length to SAX we first need to define the alphabet cuts. Saxpy retrieves cuts for a Normal alphabet (we use size 3 here) via `cuts_for_asize`:
