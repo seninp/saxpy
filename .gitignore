@@ -25,3 +25,11 @@ jupyter/.ipynb*
 # cross-impl studies) — kept local, never published with the OSS library.
 benchmarks/
 saxpy_benchmark_report.html
+
+# Cursor / Claude / agent artifacts — never commit
+.cursor/
+.claude/
+audit/
+audit-report.html
+AGENTS.md
+*.mdc

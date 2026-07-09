@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Reject commits that stage Cursor, Claude, or other agent housekeeping files.
+set -euo pipefail
+
+blocked=$(
+  git diff --cached --name-only --diff-filter=ACM |
+    grep -E '(^|/)\.cursor/|(^|/)\.claude/|(^|/)audit/|(^|/)audit-report\.html$|(^|/)AGENTS\.md$|\.mdc$' ||
+    true
+)
+
+if [[ -n "${blocked}" ]]; then
+  echo "Refusing commit: agent/housekeeping artifacts must not be committed:" >&2
+  echo "${blocked}" >&2
+  echo "Run: git reset HEAD -- <path>" >&2
+  exit 1
+fi
