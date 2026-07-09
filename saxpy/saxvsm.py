@@ -54,13 +54,13 @@ def manyseries_to_wordbag(
 def _term_frequency(count, tf_scheme):
     """Term-frequency weighting for a single (word, class) raw ``count``.
 
-    Cross-implementation note: SAX-VSM impls historically disagree on the TF
-    transform. ``log1p`` (``ln(1 + tf)``) is what saxpy and jmotif-R use;
-    ``smart`` (``1 + ln(tf)``, the SMART ``ltc`` log-TF) is what the Java
-    ``sax-vsm_classic`` of the 2013 paper uses. They are not a uniform scalar of
-    each other, so they can change which class wins; ``log1p`` is the saxpy/R
-    default. The IDF base (``ln`` here) is a uniform per-word factor and is
-    cosine-invariant, so it never affects classification.
+    Cross-implementation note: SAX-VSM impls historically disagreed on the TF
+    transform. As of ``sax-vsm_classic`` 2.0.0, Java, saxpy, and jmotif-R all
+    default to ``log1p`` (``ln(1 + tf)``). ``smart`` (``1 + ln(tf)``, the SMART
+    ``ltc`` log-TF) remains available for experiments and matches pre-2.0.0 Java
+    releases. The schemes are not a uniform scalar of each other, so they can
+    change which class wins. The IDF base (``ln`` here) is a uniform per-word
+    factor and is cosine-invariant, so it never affects classification.
     """
     if tf_scheme == "log1p":
         return np.log(1 + count)
@@ -73,8 +73,9 @@ def bags_to_tfidf(bags_dict, tf_scheme="log1p"):
     """Compute TF*IDF weight vectors for a set of word bags.
 
     ``tf_scheme`` selects the term-frequency transform (``"log1p"`` =
-    ``ln(1 + tf)``, the saxpy/jmotif-R default; ``"smart"`` = ``1 + ln(tf)``,
-    the Java ``sax-vsm_classic`` paper scheme). See :func:`_term_frequency`.
+    ``ln(1 + tf)``, the default across Java/R/Python since sax-vsm 2.0.0;
+    ``"smart"`` = ``1 + ln(tf)``, the pre-2.0.0 Java scheme). See
+    :func:`_term_frequency`.
     """
 
     # classes
