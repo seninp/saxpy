@@ -12,7 +12,7 @@ This code is released under [GPL v.2.0](https://www.gnu.org/licenses/old-license
   * **SAX-VSM** -- an algorithm for interpretable time series classification (and its discretization parameters optimization) [5]
   * **SAX-ENERGY**, **SAX-REPEAT**, **SAX-INDEPENDENT** -- extensions of SAX to multi-dimensional time series [4]
 
-Note that most of this functionality is also implemented in [R](https://github.com/jMotif/jmotif-R) (the `jmotif` package on CRAN) and in [Java](https://github.com/jMotif/SAX); the SAX-VSM classifier specifically also lives in the Java [sax-vsm_classic](https://github.com/jMotif/sax-vsm_classic) project, and the grammar-based anomaly work in [GrammarViz](https://github.com/GrammarViz2/grammarviz2_src). saxpy is the **reference Python** port of that stack -- see the next section.
+Note that most of this functionality is also implemented in [R](https://github.com/jMotif/jmotif-R) (the `jmotif` package on CRAN) and in [Java](https://github.com/jMotif/SAX); the SAX-VSM classifier lives in [sax-vsm_classic](https://github.com/jMotif/sax-vsm_classic) ([docs](https://jmotif.github.io/sax-vsm_site/)), and grammar-based pattern discovery in [GrammarViz 3.0](https://grammarviz2.github.io/grammarviz2_site/) ([source](https://github.com/GrammarViz2/grammarviz2_src)). saxpy is the **reference Python** port of that stack -- see the next section.
 
 #### Reference Python implementation
 
@@ -353,9 +353,11 @@ In Proc. of the International Conference on Extending Database Technology, EDBT 
 
 ## Citing this work
 
-If you are using this implementation for your academic work, please cite our [GrammarViz 2.0 paper](http://link.springer.com/chapter/10.1007/978-3-662-44845-8_37):
+For the **SAX stack**, discord search, and **SAX-VSM** classifier, cite [5] (Senin & Malinchik, ICDM 2013).
 
-[[Citation]](https://raw.githubusercontent.com/jMotif/SAX/master/citation.bib) Senin, P., Lin, J., Wang, X., Oates, T., Gandhi, S., Boedihardjo, A.P., Chen, C., Frankenstein, S., Lerner, M., [*GrammarViz 2.0: a tool for grammar-based pattern discovery in time series*](http://csdl.ics.hawaii.edu/techreports/2014/14-06/14-06.pdf), ECML/PKDD Conference (2014).
+For **grammar-based** pattern discovery (RePair, RRA), cite the [GrammarViz 3.0 paper](https://doi.org/10.1145/3051126): Senin, P., Lin, J., Wang, X., Oates, T., Gandhi, S., Boedihardjo, A.P., Chen, C., Frankenstein, S., [*GrammarViz 3.0: Interactive Discovery of Variable-Length Time Series Patterns*](https://github.com/csdl/techreports/blob/master/techreports/2017/17-04/17-04.pdf), ACM Trans. Knowl. Discov. Data, February 2018.
+
+[[Click here for Citation BibTeX]](https://raw.githubusercontent.com/jMotif/SAX/master/citation.bib)
 
 ## Made with Aloha!
 ![Made with Aloha!](https://raw.githubusercontent.com/GrammarViz2/grammarviz2_src/master/src/resources/assets/aloha.jpg)
