@@ -1,6 +1,51 @@
 """Implements PAA."""
 
+import math
+
 import numpy as np
+
+
+def _paa2(ts, paa_num):
+    """Fractional-boundary PAA (matches jmotif-R ``_paa2`` / Java ``TSProcessor.paa``).
+
+    Uses left-to-right sequential summation so segment means match the C++/Java
+    reference even when a segment mean is ~0 and IEEE-754 order would flip its sign
+    under NumPy's pairwise ``mean``.
+    """
+    ts = [float(x) for x in np.asarray(ts, dtype=float).ravel()]
+    length = len(ts)
+    if length == paa_num:
+        return np.array(ts, dtype=float)
+
+    points_per_segment = length / paa_num
+    breaks = [i * points_per_segment for i in range(paa_num + 1)]
+    breaks[paa_num] = float(length)
+
+    res = []
+    for i in range(paa_num):
+        seg_start = breaks[i]
+        seg_end = breaks[i + 1]
+
+        frac_begin = math.ceil(seg_start) - seg_start
+        frac_end = seg_end - math.floor(seg_end)
+
+        full_begin = int(math.floor(seg_start))
+        full_end = int(math.ceil(seg_end))
+        if full_end > length:
+            full_end = length
+
+        sum_of_elems = 0.0
+        for j in range(full_begin, full_end):
+            v = ts[j]
+            if j == full_begin and frac_begin > 0:
+                v *= frac_begin
+            if j == full_end - 1 and frac_end > 0:
+                v *= frac_end
+            sum_of_elems += v
+
+        res.append(sum_of_elems / points_per_segment)
+
+    return np.array(res, dtype=float)
 
 
 def paa(series, paa_segment_size, sax_type="unidim"):
@@ -55,22 +100,7 @@ def paa(series, paa_segment_size, sax_type="unidim"):
     res = np.zeros((num_dims, paa_segment_size))
 
     for dim in range(num_dims):
-        column = series[:, dim]
-        # PAA by averaging. These are the vectorized form of the original
-        # element-wise ``np.add.at`` scatter loops -- same arithmetic and
-        # summation order, but orders of magnitude faster on long series.
-        if series_len % paa_segment_size == 0:
-            # Evenly divisible: average contiguous blocks of ``inc`` points.
-            inc = series_len // paa_segment_size
-            res[dim] = column.reshape(paa_segment_size, inc).mean(axis=1)
-        else:
-            # Otherwise the classic expand-by-paa_size / contract-by-series_len
-            # construction, so segment boundaries can fall between samples.
-            res[dim] = (
-                np.repeat(column, paa_segment_size)
-                .reshape(paa_segment_size, series_len)
-                .mean(axis=1)
-            )
+        res[dim] = _paa2(series[:, dim], paa_segment_size)
 
     if sax_type in ["repeat", "energy"]:
         return res.T

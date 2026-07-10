@@ -12,18 +12,25 @@ This code is released under [GPL v.2.0](https://www.gnu.org/licenses/old-license
   * **SAX-VSM** -- an algorithm for interpretable time series classification (and its discretization parameters optimization) [5]
   * **SAX-ENERGY**, **SAX-REPEAT**, **SAX-INDEPENDENT** -- extensions of SAX to multi-dimensional time series [4]
 
-Note that most of this functionality is also implemented in [R](https://github.com/jMotif/jmotif-R) (the `jmotif` package on CRAN) and in [Java](https://github.com/jMotif/SAX); the SAX-VSM classifier specifically also lives in the Java [sax-vsm_classic](https://github.com/jMotif/sax-vsm_classic) project, and the grammar-based anomaly work in [GrammarViz](https://github.com/GrammarViz2/grammarviz2_src). These implementations are kept aligned -- see the next section.
+Note that most of this functionality is also implemented in [R](https://github.com/jMotif/jmotif-R) (the `jmotif` package on CRAN) and in [Java](https://github.com/jMotif/SAX); the SAX-VSM classifier specifically also lives in the Java [sax-vsm_classic](https://github.com/jMotif/sax-vsm_classic) project, and the grammar-based anomaly work in [GrammarViz](https://github.com/GrammarViz2/grammarviz2_src). saxpy is the **reference Python** port of that stack -- see the next section.
 
-#### Cross-implementation alignment
+#### Reference Python implementation
 
-The Python (saxpy), R, and Java implementations are kept aligned: the SAX stack -- z-Normalization, PAA, Gaussian breakpoints, symbol assignment -- and the HOT-SAX / brute-force discord search produce the same results across all three to floating-point precision. The shared conventions are:
+**saxpy is a reference Python implementation of the jMotif SAX algorithms, not performance-tuned production machinery.** It is meant for users who want to read the code, run experiments in Python, reproduce results, or see what the stack *should* do. [jmotif-conformance](https://github.com/jMotif/jmotif-conformance) generates golden expectations from saxpy and checks R and Java against them.
 
-  * z-Normalization uses the **population** standard deviation (divide by `n`), matching the Matrix Profile / MASS convention, so each window has empirical variance exactly 1 (the assumption behind SAX's equiprobable breakpoints);
+For large series or production throughput, use the compiled **R** (`jmotif`) or **Java** (`jmotif-sax`, `jmotif-gi`, GrammarViz) packages. saxpy prioritizes **clarity and parity with R/Java** over shaving inner-loop time in pure Python.
+
+**Stack alignment at the bottom.** The lowest-level steps -- z-Normalization, PAA segment means, Gaussian breakpoints, symbol assignment -- follow the same rules as jmotif-R and Java. Early in 2.x we briefly used NumPy vectorization (pairwise `mean` / `var` on PAA blocks); that was the wrong direction for a reference port and diverged from R/Java when a PAA bin lands near zero after z-Norm (e.g. ecg0606 at TS index 87, `w=100, paa=4, alphabet=4`). **Those shortcuts were reverted.** Univariate z-Norm and PAA now use the same left-to-right sequential accumulation as jmotif-R (`_paa2`, `_znorm`) and Java (`TSProcessor.paa`, `TSProcessor.znorm`).
+
+Shared conventions across Python, R, and Java:
+
+  * z-Normalization uses the **population** standard deviation (divide by `n`), matching the Matrix Profile / MASS convention;
+  * univariate z-Norm and PAA use **sequential summation** (as in R/Java), not NumPy pairwise reductions, so near-zero PAA bins get the same symbol everywhere;
   * PAA uses **fractional** segment boundaries (a sample straddling a segment edge is split by overlap);
   * a value falling exactly on a breakpoint maps to the symbol **above** the cut;
-  * all distance-based discord search compares **z-normalized** subsequences -- HOT-SAX, brute-force, *and* RRA key on shape, not amplitude; HOT-SAX and brute-force additionally break distance ties by the lowest index, so their results are reproducible regardless of search order.
+  * distance-based discord search compares **z-normalized** subsequences; HOT-SAX and brute-force break distance ties by the lowest index.
 
-RRA agrees with the others on the discord *region* (e.g. the ecg0606 anomaly at position 430), but its reported nearest-neighbour distance is a search-order-dependent *approximation*: the rarest-first search early-abandons as soon as a close-enough neighbour is found, so the exact distance value (not the position) can differ by a few percent between implementations whose random visit orders differ. This is inherent to the heuristic, not a convention gap.
+Higher layers can still differ in implementation detail. RePair may assign different **rule ids or counts** when digram frequencies tie. RRA `nn_distance` is a search-order-dependent approximation. Java `NewRepair` can shift a variable-length RRA span by one index vs saxpy/R while still overlapping the same HOT-SAX region -- conformance checks overlap, not exact span boundaries.
 
 **SAX-VSM** is aligned too. The TF\*IDF weight uses **log1p term frequency, `ln(1 + tf)`, and a natural-log IDF, `ln(N / df)`** in saxpy, jmotif-R, and the Java `sax-vsm_classic` (which previously used the SMART `1 + ln(tf)` / `log10` scheme). A cross-implementation accuracy study (CBF, Gun_Point, Coffee, Beef, OSULeaf, Adiac) found `log1p` ties or beats SMART at the tuned operating point on every dataset and wins more parameter points overall, so `log1p` is now canonical. Note that the IDF *base* (`ln` vs `log10`) is a uniform per-word factor that cancels in the cosine -- it never affects a classification, only the printed weight magnitudes; the TF nonlinearity is the only behavioural lever. On the shared Cylinder-Bell-Funnel set all three score identically (900/900 at window 60 / PAA 8 / alphabet 6, EXACT numerosity reduction).
 
@@ -207,7 +214,7 @@ Saxpy infers a RePair grammar from a space-delimited string of SAX words (or any
     g[0].rule_string           # 'R4 xxx R4'
     g[4].expanded_rule_string  # 'abc abc cba cba bac'
 
-RePair is **lossless** and the grammar is structurally equivalent across the R, Python, and Java implementations: decompressing R0 always reproduces the input, and R0 ends up with no repeated digram. RePair works by repeatedly replacing the *most frequent* digram with a new rule; when several digrams share the maximal frequency, *which one is replaced first* is an implementation detail (saxpy follows Python dict insertion order, the C++/R port follows `unordered_map` iteration, Java uses a priority queue). On tie-heavy inputs this can change the **rule numbering** and which equal-frequency pair gets factored -- so the rule ids and even the rule count may differ slightly between implementations -- but the compression is correct in all of them. Treat `rule_id` as implementation-local, not a cross-language identifier.
+RePair is **lossless** and the grammar is structurally equivalent across the R, Python, and Java implementations: decompressing R0 always reproduces the input, and R0 ends up with no repeated digram. RePair works by repeatedly replacing the *most frequent* digram with a new rule; when several digrams share the maximal frequency, *which one is replaced first* is an implementation detail (priority-queue / hash-table iteration order). On tie-heavy inputs this can change **rule ids and rule count** between saxpy, R, and Java even when the SAX input string is identical -- so treat `rule_id` as implementation-local, not a cross-language identifier. saxpy's SAX layer matches R/Java; grammar trees may still diverge above that.
 
 #### 6.0 Time series discord discovery with RRA
 The Rare Rule Anomaly (RRA) algorithm builds a RePair grammar over the SAX representation, derives variable-length subsequences from the grammar rules, and searches them rarest-first. It is exposed as `find_discords_rra`:
@@ -224,7 +231,7 @@ which returns a list of `RRADiscord` records (variable-length, with start/end po
     [RRADiscord(rule_id=76, start=1722, end=1870, length=148, nn_distance=0.05577536309246554),
      RRADiscord(rule_id=35, start=430, end=531, length=101, nn_distance=0.05258209490111305)]
 
-As noted in the alignment section, `nn_distance` is computed between **z-normalized** subsequences (so RRA keys on shape, like HOT-SAX), and because the rarest-first search early-abandons it is a search-order-dependent *approximation* of the true nearest-neighbour distance; the discord *positions* are stable. The signature:
+As noted in the reference section, `nn_distance` is computed between **z-normalized** subsequences (so RRA keys on shape, like HOT-SAX), and because the rarest-first search early-abandons it is a search-order-dependent *approximation* of the true nearest-neighbour distance; the discord *positions* are stable. The signature:
 
     def find_discords_rra(series, win_size, paa_size=3, alphabet_size=3,
                           nr_strategy="none", znorm_threshold=0.01, num_discords=2,
@@ -289,7 +296,7 @@ The tables below characterize the time and peak-memory behaviour of the saxpy al
 | 21,600 | mitdbx_108 | 0.3 | 35.9 | 37.8 | 1.3 | 9.6 |
 | 35,039 | dutch_power | 0.6 | 58.4 | 61.8 | 2.6 | 16.4 |
 
-A few things this makes concrete: `sax_via_window` and RePair are effectively linear and cheap (RePair runs over the SAX *word* string, not the raw series); the brute-force reference and HOT-SAX are the O(n²) distance searches (the vectorized brute-force is the exact reference -- HOT-SAX's heuristic ordering is what buys the speed-up on the smaller, structured series, while on a long noisy signal the two converge in cost); and RRA, being variable-length and grammar-driven, is the heaviest in pure Python at large n (the compiled R/Java RRA is faster in absolute terms -- this is the interpreter gap, not an algorithmic difference).
+A few things this makes concrete: `sax_via_window` and RePair are effectively linear and cheap in *algorithm* terms (RePair runs over the SAX word string, not the raw series). The tables below characterize saxpy as a **reference Python** implementation -- useful for scale, not as a substitute for R/Java when raw speed matters. Brute-force and HOT-SAX are O(n²) distance searches; RRA is grammar-driven and the heaviest step at large *n* in Python.
 
 **SAX-VSM (Cylinder-Bell-Funnel, 30 train / 900 test):**
 
@@ -305,8 +312,9 @@ saxpy 2.0.0 is the first modern PyPI release (the only prior artifact was the le
   * **New: SAX-VSM classification** -- the classifier layer (§7.0) and a DIRECT cross-validation **parameter optimizer** (§7.1), verified identical to the R and Java implementations on CBF.
   * **New: the grammar layer** -- RePair grammar inference (§5.0) and RRA variable-length discord discovery (§6.0), ported from the C++/Java.
   * **New: reproducibility** -- an optional `random_state` on the HOT-SAX, brute-force, and RRA discord searches.
-  * **Cross-implementation alignment** -- the SAX stack, the discord distances, and the SAX-VSM `log1p` TF\*IDF are now aligned to R and Java (see the alignment section). Several outputs near a breakpoint differ from the 1.x line as a result.
-  * **Performance** -- a bucketed priority queue for RePair (~2.8×), a lighter RRA z-Norm path (~3--6×), and vectorized PAA.
+  * **Reference Python port** -- pip-installable, readable, aligned to R/Java at the SAX layer; not built as production machinery (see the reference section).
+  * **Cross-implementation alignment** -- z-Norm, PAA, discord distances, and SAX-VSM `log1p` TF\*IDF follow the jMotif stack; early NumPy vectorization on PAA was reverted so the lowest layer stays aligned.
+  * **Performance** -- a bucketed priority queue for RePair (~2.8×), a lighter RRA z-Norm path (~3--6×) where it does not compromise reference semantics.
   * **Modernized packaging & tooling** -- pbr → Hatchling, `uv` + `pyproject.toml`, ruff + mypy gates, and a 3.10/3.11/3.12 × linux/macOS/windows CI matrix. The minimum Python is now 3.10.
   * **Renamed** `cosine_similarity` → `cosine_distance` (it returns `1 - cosine`); the old name is kept as a deprecated alias.
 

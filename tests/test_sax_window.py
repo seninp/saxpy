@@ -155,3 +155,17 @@ def test_repeat_rejects_mindist():
     assert sax_via_window(
         data, win_size=2, paa_size=2, alphabet_size=4, sax_type="repeat", nr_strategy="exact"
     )
+
+
+def test_ecg0606_window_87_matches_r_java():
+    """Regression: sequential znorm+PAA must match jmotif-R/Java on near-zero PAA bins.
+
+    NumPy pairwise summation flipped the sign of the last PAA segment (~1e-15),
+    yielding ``bdac`` instead of ``bdab`` at TS index 87.
+    """
+    from pathlib import Path
+
+    series = np.loadtxt(Path(__file__).resolve().parents[1] / "data" / "ecg0606_1.csv")
+    sax = sax_via_window(series, win_size=100, paa_size=4, alphabet_size=4, nr_strategy="none")
+    pos_to_word = {p: w for w, positions in sax.items() for p in positions}
+    assert pos_to_word[87] == "bdab"
