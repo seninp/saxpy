@@ -1,7 +1,8 @@
 Time series symbolic discretization with SAX
 ====
-[![Latest PyPI version](https://img.shields.io/pypi/v/saxpy.svg)](https://pypi.python.org/pypi/saxpy)
-[![image](http://img.shields.io/:license-gpl2-green.svg)](http://www.gnu.org/licenses/gpl-2.0.html)
+[![build](https://github.com/seninp/saxpy/actions/workflows/build.yml/badge.svg)](https://github.com/seninp/saxpy/actions/workflows/build.yml)
+[![PyPI](https://img.shields.io/pypi/v/saxpy.svg)](https://pypi.org/project/saxpy/)
+[![License](https://img.shields.io/github/license/seninp/saxpy)](https://www.gnu.org/licenses/gpl-2.0.html)
 
 
 This code is released under [GPL v.2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) and implements in Python the SAX toolkit and the algorithms built on top of it:
