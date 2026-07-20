@@ -6,12 +6,12 @@ Time series symbolic discretization with SAX
 
 
 This code is released under [GPL v.2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) and implements in Python the SAX toolkit and the algorithms built on top of it:
-  * **Symbolic Aggregate approXimation (SAX)** -- discretizing a time series into a string, with z-Normalization and PAA [1]
-  * **HOT-SAX** -- an algorithm for the exact time series discord (anomaly) discovery [3]
-  * **RePair** -- a grammar-inference algorithm run over the SAX representation [7]
-  * **RRA (Rare Rule Anomaly)** -- a grammar-based, variable-length discord discovery algorithm built on RePair [8]
-  * **SAX-VSM** -- an algorithm for interpretable time series classification (and its discretization parameters optimization) [5]
-  * **SAX-ENERGY**, **SAX-REPEAT**, **SAX-INDEPENDENT** -- extensions of SAX to multi-dimensional time series [4]
+  * **[Symbolic Aggregate approXimation (SAX)](#10-simple-time-series-to-sax-conversion)** -- discretizing a time series into a string, with [z-Normalization](https://jmotif.github.io/sax-vsm_site/algorithm/znorm/) and [PAA](#20-sax-conversion-with-paa-aggregation-ie-chunking) [1]
+  * **[HOT-SAX](#40-time-series-discord-discovery-with-hot-sax)** -- an algorithm for the exact time series discord (anomaly) discovery [3]
+  * **[RePair](#50-grammar-inference-with-repair)** -- a grammar-inference algorithm run over the SAX representation [7]
+  * **[RRA (Rare Rule Anomaly)](#60-time-series-discord-discovery-with-rra)** -- a grammar-based, variable-length discord discovery algorithm built on RePair [8]
+  * **[SAX-VSM](#70-time-series-classification-with-sax-vsm)** -- an algorithm for interpretable time series classification (and its [discretization parameters optimization](#71-sax-vsm-discretization-parameters-optimization)) [5]
+  * **[SAX-ENERGY](#31-multi-dimensional-sax-sax-energy--sax-repeat--sax-independent)**, **[SAX-REPEAT](#31-multi-dimensional-sax-sax-energy--sax-repeat--sax-independent)**, **[SAX-INDEPENDENT](#31-multi-dimensional-sax-sax-energy--sax-repeat--sax-independent)** -- extensions of SAX to multi-dimensional time series [4]
 
 Note that most of this functionality is also implemented in [R](https://github.com/jMotif/jmotif-R) (the `jmotif` package on CRAN) and in [Java](https://github.com/jMotif/SAX); the SAX-VSM classifier lives in [sax-vsm_classic](https://github.com/jMotif/sax-vsm_classic) ([docs](https://jmotif.github.io/sax-vsm_site/)), and grammar-based pattern discovery in [GrammarViz 3.0](https://grammarviz2.github.io/grammarviz2_site/) ([source](https://github.com/GrammarViz2/grammarviz2_src)). saxpy is the **reference Python** port of that stack -- see the next section.
 
