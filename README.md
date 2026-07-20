@@ -178,6 +178,8 @@ For example, on a 12-point, 2-dimensional series with the independent mode:
 
 each six-letter word is the 3-letter word of dimension 0 followed by that of dimension 1.
 
+Further reading on these variants: the paper that introduces them, [Mohammad & Nishida, *Robust learning from demonstrations using multidimensional SAX*, ICCAS 2014](https://doi.org/10.1109/ICCAS.2014.6987960) [4] (pp. 64-71); and an open-access walkthrough of the SAX-REPEAT construction for multivariate series in [Figueirêdo, Guarieiro & Nascimento, *Multivariate Real Time Series Data Using Six Unsupervised Machine Learning Algorithms*, IntechOpen 2020, §2.3](https://doi.org/10.5772/intechopen.94944).
+
 #### 4.0 Time series discord discovery with HOT-SAX
 Saxpy implements the HOT-SAX discord discovery algorithm in `find_discords_hotsax`:
 
