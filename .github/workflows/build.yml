@@ -35,4 +35,17 @@ jobs:
         run: uv run mypy saxpy
 
       - name: Test (pytest)
-        run: uv run pytest --cov=saxpy --cov-report=term-missing tests
+        run: uv run pytest --cov=saxpy --cov-report=term-missing --cov-report=xml tests
+
+      - name: Upload coverage to Codecov
+        if: matrix.platform == 'ubuntu-latest' && matrix.python-version == '3.12'
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-saxpy
+          # don't fail the build if the coverage upload can't authenticate; coverage
+          # still uploads when CODECOV_TOKEN is set (required on public repos)
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true

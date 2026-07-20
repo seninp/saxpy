@@ -1,6 +1,7 @@
 Time series symbolic discretization with SAX
 ====
 [![build](https://github.com/seninp/saxpy/actions/workflows/build.yml/badge.svg)](https://github.com/seninp/saxpy/actions/workflows/build.yml)
+[![coverage](https://codecov.io/github/seninp/saxpy/graph/badge.svg?branch=master)](https://codecov.io/github/seninp/saxpy?branch=master)
 [![PyPI](https://img.shields.io/pypi/v/saxpy.svg)](https://pypi.org/project/saxpy/)
 [![License](https://img.shields.io/github/license/seninp/saxpy)](https://www.gnu.org/licenses/gpl-2.0.html)
 
