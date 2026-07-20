@@ -276,7 +276,7 @@ The window / PAA / alphabet sizes are the hidden parameters of SAX-VSM, and the 
 `optimize_parameters` is deterministic for a fixed `random_state`; the underlying CV objective is exposed separately as `cv_error(train_data, train_labels, params, ...)` if you want to score a single parameter point. Run independently, saxpy, jmotif-R, and Java each pick their own optimum and reach the same test accuracy on the datasets we checked (CBF, Coffee, Gun_Point, Beef).
 
 #### 8.0 Time series motif discovery with EMMA
-*Not yet implemented in saxpy.* EMMA (the complement to HOT-SAX -- recurrent motifs rather than discords) is available in the sibling [Java project](https://github.com/jMotif/SAX); a Python port is planned.
+*Not implemented in saxpy, and not planned.* EMMA (the complement to HOT-SAX -- recurrent motifs rather than discords) is available in the sibling [Java project](https://github.com/jMotif/SAX). A Python port is out of scope for this reference package; use the Java implementation for EMMA motif discovery.
 
 Algorithm performance
 ------------
