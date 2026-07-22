@@ -3,6 +3,23 @@
 All notable changes to saxpy are documented here. This project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+Post-**2.0.0** documentation, CI, and housekeeping. No behavioral changes to the SAX /
+discord / VSM / grammar core.
+
+### Changed
+- **CI:** upload pytest coverage to Codecov; add coverage badge.
+- **Docs:** cross-link GrammarViz 3.0 and the jMotif stack; fix dead reference links
+  (Wayback/DOI); add PyPI Documentation URL; test matrix includes Python 3.13; mark
+  EMMA/iSAX Python port as out of scope (not planned); further-reading links for
+  multidimensional SAX variants; hyperlink algorithm list in README header (match
+  jmotif-R); `saxvsm.py` TF scheme notes match Java 2.0.0 `log1p` default.
+
+### Fixed
+- README badge URLs (Maven, GitHub Actions CI, Codecov); SAX-VSM/GrammarViz site links
+  updated to new Hugo URLs.
+
 ## [2.0.0] — 2026-06
 
 First modern PyPI release. (The only artifact previously on PyPI was the legacy
