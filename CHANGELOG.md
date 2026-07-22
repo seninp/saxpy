@@ -8,6 +8,9 @@ All notable changes to saxpy are documented here. This project adheres to
 Post-**2.0.0** documentation, CI, and housekeeping. No behavioral changes to the SAX /
 discord / VSM / grammar core.
 
+### Added
+- **Tier-B RRA conformance tests** — ecg0606 region and NN-distance pins (w100/w120/w150).
+
 ### Changed
 - **CI:** upload pytest coverage to Codecov; add coverage badge.
 - **Docs:** cross-link GrammarViz 3.0 and the jMotif stack; fix dead reference links

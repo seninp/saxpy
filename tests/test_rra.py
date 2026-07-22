@@ -123,6 +123,29 @@ def test_normalized_distance_differs_for_different_shapes():
     assert d > 0 and np.isfinite(d)
 
 
+def test_rra_tier_b_exact_span_w100_seed0():
+    """Tier-B exact span on ecg0606 (conformance rra_ecg_top_region, seed=0)."""
+    top = find_discords_rra(_ecg(), 100, 4, 4, num_discords=1, random_state=0)[0]
+    assert (top.start, top.end) == (430, 531)
+    assert top.nn_distance == pytest.approx(0.054235681140201275, abs=1e-12)
+
+
+def test_rra_tier_b_exact_span_w120_seed0():
+    """Tier-B exact span on ecg0606 (conformance rra_ecg_top_region_w120, seed=0)."""
+    top = find_discords_rra(_ecg(), 120, 4, 4, num_discords=1, random_state=0)[0]
+    assert (top.start, top.end) == (430, 551)
+    assert top.nn_distance == pytest.approx(0.04856148607272408, abs=1e-12)
+
+
+def test_rra_w150_p7_a4_no_zero_gap_top():
+    """w150/p7/a4: min_uncovered=7 filters sub-PAA zero gaps; top is a grammar rule."""
+    top = find_discords_rra(_ecg(), 150, 7, 4, num_discords=1, random_state=0)[0]
+    assert (top.start, top.end) == (1006, 1175)
+    assert top.rule_id != -1
+    assert top.length >= 7
+    assert top.nn_distance > 0
+
+
 def test_normalized_distance_is_symmetric_in_length_handling():
     """Unequal lengths use _paa2 on the longer; result is finite and >= 0."""
     series = np.linspace(0, 1, 20)
