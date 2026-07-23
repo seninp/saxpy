@@ -40,6 +40,7 @@ Higher layers can still differ in implementation detail. RePair may assign diffe
 saxpy is published on PyPI, install it with `pip` (or `uv pip`):
 
     $ pip install saxpy
+    # or pin: pip install saxpy==2.0.1
 
 saxpy requires Python 3.10+ and depends on `numpy`, `scipy`, and `scikit-learn`. The wheel bundles the **ecg0606** sample (`saxpy.ecg0606_path()`); the full UCR CBF dataset for SAX-VSM examples lives under `resources/data/cbf/` in the source tree (clone required).
 
@@ -339,7 +340,12 @@ A few things this makes concrete: `sax_via_window` and RePair are effectively li
 
 Changes since the last release
 ------------
-saxpy 2.0.0 is the first modern PyPI release (the only prior artifact was the legacy `1.0.1.dev167` pbr snapshot). The full list is in [CHANGELOG.md](CHANGELOG.md); the highlights:
+
+**2.0.1** (Jul 2026) — user-facing packaging (no algorithm changes). The wheel now bundles the **ecg0606** sample (`from saxpy import ecg0606_path`), stable **top-level exports** (`import saxpy`), and a README quick-start for `pip install` users. **Live on [PyPI](https://pypi.org/project/saxpy/2.0.1/).** See [CHANGELOG.md](CHANGELOG.md).
+
+    pip install saxpy==2.0.1
+
+**2.0.0** — first modern PyPI release (the only prior artifact was the legacy `1.0.1.dev167` pbr snapshot). Highlights:
 
   * **New: SAX-VSM classification** -- the classifier layer (§7.0) and a DIRECT cross-validation **parameter optimizer** (§7.1), verified identical to the R and Java implementations on CBF.
   * **New: the grammar layer** -- RePair grammar inference (§5.0) and RRA variable-length discord discovery (§6.0), ported from the C++/Java.

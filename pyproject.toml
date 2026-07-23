@@ -36,6 +36,7 @@ Homepage = "https://github.com/seninp/saxpy"
 Documentation = "https://github.com/seninp/saxpy#readme"
 Repository = "https://github.com/seninp/saxpy"
 Changelog = "https://github.com/seninp/saxpy/blob/master/CHANGELOG.md"
+PyPI = "https://pypi.org/project/saxpy/2.0.1/"
 
 [dependency-groups]
 dev = [
