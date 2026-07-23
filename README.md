@@ -36,54 +36,94 @@ Higher layers can still differ in implementation detail. RePair may assign diffe
 
 **SAX-VSM** is aligned too. The TF\*IDF weight uses **log1p term frequency, `ln(1 + tf)`, and a natural-log IDF, `ln(N / df)`** in saxpy, jmotif-R, and the Java `sax-vsm_classic` (which previously used the SMART `1 + ln(tf)` / `log10` scheme). A cross-implementation accuracy study (CBF, Gun_Point, Coffee, Beef, OSULeaf, Adiac) found `log1p` ties or beats SMART at the tuned operating point on every dataset and wins more parameter points overall, so `log1p` is now canonical. Note that the IDF *base* (`ln` vs `log10`) is a uniform per-word factor that cancels in the cosine -- it never affects a classification, only the printed weight magnitudes; the TF nonlinearity is the only behavioural lever. On the shared Cylinder-Bell-Funnel set all three score identically (900/900 at window 60 / PAA 8 / alphabet 6, EXACT numerosity reduction).
 
-#### Installation
-saxpy is published on PyPI, install it with `pip` (or `uv pip`):
+#### Getting started
 
-    $ pip install saxpy
-    # or pin: pip install saxpy==2.0.1
+**Use saxpy from PyPI** (experiments, notebooks, reproducing papers) — create a virtual
+environment, install the wheel, run the quick start below. **Develop saxpy** (tests,
+patches, SAX-VSM examples that need the bundled CBF files) — clone the repo and use
+[`uv sync`](#development-from-source) instead.
 
-saxpy requires Python 3.10+ and depends on `numpy`, `scipy`, and `scikit-learn`. The wheel bundles the **ecg0606** sample (`saxpy.ecg0606_path()`); the full UCR CBF dataset for SAX-VSM examples lives under `resources/data/cbf/` in the source tree (clone required).
+##### Install from PyPI
 
-#### Quick start (pip install)
+Requires **Python 3.10+**. Dependencies (`numpy`, `scipy`, `scikit-learn`) are pulled in
+automatically.
 
-After `pip install saxpy`, the bundled ecg sample and top-level imports work without cloning the repo:
+On current **macOS** (Homebrew) and **Linux** (Debian/Ubuntu) system Python is
+[externally managed](https://peps.python.org/pep-0668/) — bare `pip install` is blocked.
+Always install into a **virtual environment** (once per machine):
+
+    python3 -m venv ~/venvs/saxpy
+    source ~/venvs/saxpy/bin/activate    # Windows: ~/venvs/saxpy\Scripts\activate
+    python -m pip install -U pip
+    pip install saxpy==2.0.1
+    python -c "import saxpy; print(saxpy.__version__)"
+
+If you use [uv](https://docs.astral.sh/uv/), the same venv + `uv pip install saxpy==2.0.1`
+works; `uv` does not replace the venv step on PEP 668 systems.
+
+The wheel ships the **ecg0606** ECG sample (`ecg0606_path()`). The full UCR
+**Cylinder-Bell-Funnel** files for the SAX-VSM walkthrough (§7) live only in a git clone
+under `resources/data/cbf/`.
+
+##### Quick start
+
+With the venv **activated**, paste into a Python session or script:
 
     import numpy as np
-    import saxpy
-    from saxpy import find_discords_hotsax, find_discords_rra, ecg0606_path
+    from saxpy import ecg0606_path, find_discords_hotsax, find_discords_rra
 
     ecg = np.genfromtxt(ecg0606_path(), delimiter=",")
-    find_discords_hotsax(ecg, win_size=100, num_discords=2, paa_size=4, alphabet_size=4)
-    find_discords_rra(ecg, win_size=100, paa_size=4, alphabet_size=4, num_discords=1, random_state=0)
+    hotsax = find_discords_hotsax(
+        ecg, win_size=100, num_discords=2, paa_size=4, alphabet_size=4
+    )
+    rra = find_discords_rra(
+        ecg, win_size=100, paa_size=4, alphabet_size=4,
+        num_discords=1, random_state=0,
+    )
+    print("ecg length:", len(ecg))          # 2299
+    print("HOT-SAX top discord:", hotsax[0][0])  # 430 on ecg0606
+    print("RRA spans:", len(rra))
 
-See the [API map](#api-map-stable-exports) below for the full public surface.
+The tutorials below (§1–§7) import from submodules (`from saxpy.znorm import znorm`, etc.)
+— that is the most reliable style and matches the rest of this README.
 
-#### API map (stable exports)
+##### Import cheat sheet
 
-| Use case | Import from `saxpy` |
-|----------|---------------------|
-| Alphabet cuts | `cuts_for_asize` |
-| z-Norm / PAA / SAX string | `znorm`, `paa`, `ts_to_string`, `sax_by_chunking`, `sax_via_window` |
-| HOT-SAX / brute-force discords | `find_discords_hotsax`, `find_discords_brute_force` |
-| RePair grammar | `str_to_repair_grammar` |
-| RRA discords | `find_discords_rra` |
-| SAX-VSM classify | `load_ucr_data`, `train_tfidf`, `classify_series`, `classification_accuracy` |
-| SAX-VSM bags / TF-IDF | `series_to_wordbag`, `manyseries_to_wordbag`, `bags_to_tfidf`, `cosine_similarity` |
-| Parameter search (DIRECT) | `optimize_parameters`, `cv_error` |
-| Sample data | `ecg0606_path` |
+Most callables are re-exported from the top-level package (`from saxpy import …`). Two
+names — **`znorm`** and **`paa`** — share names with submodules, so import them from their
+modules instead:
 
-All symbols are also available from their submodules (`saxpy.hotsax`, etc.) if you prefer explicit imports.
+| Task | Import |
+|------|--------|
+| Sample ECG path | `from saxpy import ecg0606_path` |
+| z-Normalization | `from saxpy.znorm import znorm` |
+| PAA | `from saxpy.paa import paa` |
+| SAX string / sliding window | `from saxpy.sax import ts_to_string, sax_by_chunking, sax_via_window` |
+| Alphabet breakpoints | `from saxpy.alphabet import cuts_for_asize` |
+| HOT-SAX / brute-force discords | `from saxpy import find_discords_hotsax, find_discords_brute_force` |
+| RePair grammar | `from saxpy.repair import str_to_repair_grammar` |
+| RRA discords | `from saxpy import find_discords_rra` |
+| SAX-VSM classify | `from saxpy.saxvsm import load_ucr_data, train_tfidf, classify_series, classification_accuracy` |
+| SAX-VSM bags / TF·IDF | `from saxpy.saxvsm import series_to_wordbag, manyseries_to_wordbag, bags_to_tfidf, cosine_similarity` |
+| DIRECT parameter search | `from saxpy.saxvsm_optimize import optimize_parameters, cv_error` |
 
-#### Development
-The project uses [uv](https://docs.astral.sh/uv/) for environment management and packaging (PEP 621 / `pyproject.toml`, Hatchling build backend). From a clone:
+Top-level lazy exports (`import saxpy` then `saxpy.find_discords_hotsax`, etc.) also work
+for every row except **znorm** and **paa**.
 
-    $ uv sync                 # create the venv and install saxpy + dev tools
+#### Development from source
+
+The project uses [uv](https://docs.astral.sh/uv/) for environment management and packaging
+(PEP 621 / `pyproject.toml`, Hatchling build backend). From a clone:
+
+    $ uv sync                 # create .venv and install saxpy + dev tools
     $ uv run pytest           # run the test suite (unit tests + doctests)
     $ uv run ruff check       # lint
     $ uv run ruff format      # format
     $ uv run mypy saxpy       # type-check
 
-The tests run across all supported interpreters via `uv run --python 3.10/3.11/3.12 pytest`; `uv build` produces a wheel + sdist in `dist/`; `uv run pre-commit install` enables the ruff + mypy hooks.
+The tests run across all supported interpreters via `uv run --python 3.10/3.11/3.12 pytest`;
+`uv build` produces a wheel + sdist in `dist/`; `uv run pre-commit install` enables the
+ruff + mypy hooks.
 
 SAX in a nutshell
 ------------
