@@ -41,7 +41,37 @@ saxpy is published on PyPI, install it with `pip` (or `uv pip`):
 
     $ pip install saxpy
 
-saxpy requires Python 3.10+ and depends on `numpy`, `scipy`, and `scikit-learn`. The example data used in this README (`data/ecg0606_1.csv`, `resources/data/cbf/`) ships in the source tree, so the file-reading examples below assume you are running from a repository clone; a `pip`-installed wheel contains the code only.
+saxpy requires Python 3.10+ and depends on `numpy`, `scipy`, and `scikit-learn`. The wheel bundles the **ecg0606** sample (`saxpy.ecg0606_path()`); the full UCR CBF dataset for SAX-VSM examples lives under `resources/data/cbf/` in the source tree (clone required).
+
+#### Quick start (pip install)
+
+After `pip install saxpy`, the bundled ecg sample and top-level imports work without cloning the repo:
+
+    import numpy as np
+    import saxpy
+    from saxpy import find_discords_hotsax, find_discords_rra, ecg0606_path
+
+    ecg = np.genfromtxt(ecg0606_path(), delimiter=",")
+    find_discords_hotsax(ecg, win_size=100, num_discords=2, paa_size=4, alphabet_size=4)
+    find_discords_rra(ecg, win_size=100, paa_size=4, alphabet_size=4, num_discords=1, random_state=0)
+
+See the [API map](#api-map-stable-exports) below for the full public surface.
+
+#### API map (stable exports)
+
+| Use case | Import from `saxpy` |
+|----------|---------------------|
+| Alphabet cuts | `cuts_for_asize` |
+| z-Norm / PAA / SAX string | `znorm`, `paa`, `ts_to_string`, `sax_by_chunking`, `sax_via_window` |
+| HOT-SAX / brute-force discords | `find_discords_hotsax`, `find_discords_brute_force` |
+| RePair grammar | `str_to_repair_grammar` |
+| RRA discords | `find_discords_rra` |
+| SAX-VSM classify | `load_ucr_data`, `train_tfidf`, `classify_series`, `classification_accuracy` |
+| SAX-VSM bags / TF-IDF | `series_to_wordbag`, `manyseries_to_wordbag`, `bags_to_tfidf`, `cosine_similarity` |
+| Parameter search (DIRECT) | `optimize_parameters`, `cv_error` |
+| Sample data | `ecg0606_path` |
+
+All symbols are also available from their submodules (`saxpy.hotsax`, etc.) if you prefer explicit imports.
 
 #### Development
 The project uses [uv](https://docs.astral.sh/uv/) for environment management and packaging (PEP 621 / `pyproject.toml`, Hatchling build backend). From a clone:
@@ -185,10 +215,9 @@ Further reading on these variants: the paper that introduces them, [Mohammad & N
 Saxpy implements the HOT-SAX discord discovery algorithm in `find_discords_hotsax`:
 
     import numpy as np
-    from numpy import genfromtxt
-    from saxpy.hotsax import find_discords_hotsax
+    from saxpy import find_discords_hotsax, ecg0606_path
 
-    dd = genfromtxt("data/ecg0606_1.csv", delimiter=',')
+    dd = np.genfromtxt(ecg0606_path(), delimiter=",")
     find_discords_hotsax(dd)
 
 which finds the anomalies as `(position, nearest-neighbour distance)` pairs:
@@ -224,10 +253,9 @@ RePair is **lossless** and the grammar is structurally equivalent across the R, 
 The Rare Rule Anomaly (RRA) algorithm builds a RePair grammar over the SAX representation, derives variable-length subsequences from the grammar rules, and searches them rarest-first. It is exposed as `find_discords_rra`:
 
     import numpy as np
-    from numpy import genfromtxt
-    from saxpy.rra import find_discords_rra
+    from saxpy import find_discords_rra, ecg0606_path
 
-    dd = genfromtxt("data/ecg0606_1.csv", delimiter=',')
+    dd = np.genfromtxt(ecg0606_path(), delimiter=",")
     find_discords_rra(dd, win_size=100, num_discords=2)
 
 which returns a list of `RRADiscord` records (variable-length, with start/end positions and the nearest-neighbour distance):

@@ -5,23 +5,18 @@ All notable changes to saxpy are documented here. This project adheres to
 
 ## [Unreleased]
 
-Post-**2.0.0** documentation, CI, and housekeeping. No behavioral changes to the SAX /
-discord / VSM / grammar core.
+## [2.0.1] — 2026-07-23
+
+User-facing packaging and onboarding improvements (no algorithm changes).
 
 ### Added
+- **Bundled `ecg0606_1.csv`** in the wheel (`saxpy.data.ecg0606_path()`).
+- **Top-level exports** — stable API re-exported from `import saxpy`.
+- README **Quick start** and **API map** for pip-installed users.
 - **Tier-B RRA conformance tests** — ecg0606 region and NN-distance pins (w100/w120/w150).
 
 ### Changed
-- **CI:** upload pytest coverage to Codecov; add coverage badge.
-- **Docs:** cross-link GrammarViz 3.0 and the jMotif stack; fix dead reference links
-  (Wayback/DOI); add PyPI Documentation URL; test matrix includes Python 3.13; mark
-  EMMA/iSAX Python port as out of scope (not planned); further-reading links for
-  multidimensional SAX variants; hyperlink algorithm list in README header (match
-  jmotif-R); `saxvsm.py` TF scheme notes match Java 2.0.0 `log1p` default.
-
-### Fixed
-- README badge URLs (Maven, GitHub Actions CI, Codecov); SAX-VSM/GrammarViz site links
-  updated to new Hugo URLs.
+- PyPI **Documentation** URL now points at the saxpy README.
 
 ## [2.0.0] — 2026-06
 

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "saxpy"
-version = "2.0.0"
+version = "2.0.1"
 description = "SAX, HOT-SAX, and SAX-VSM implementations for time series symbolic discretization in Python"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -33,7 +33,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/seninp/saxpy"
-Documentation = "https://jmotif.github.io/sax-vsm_site/"
+Documentation = "https://github.com/seninp/saxpy#readme"
 Repository = "https://github.com/seninp/saxpy"
 Changelog = "https://github.com/seninp/saxpy/blob/master/CHANGELOG.md"
 
