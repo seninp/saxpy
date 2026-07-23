@@ -5,14 +5,18 @@ All notable changes to saxpy are documented here. This project adheres to
 
 ## [Unreleased]
 
+### Changed
+- README **Getting started** — venv-first PyPI install (PEP 668), quick start with expected
+  output, import cheat sheet (`znorm` / `paa` submodule note).
+
 ## [2.0.1] — 2026-07-23
 
 User-facing packaging and onboarding improvements (no algorithm changes).
 
 ### Added
-- **Bundled `ecg0606_1.csv`** in the wheel (`saxpy.data.ecg0606_path()`).
+- **Bundled `ecg0606_1.csv`** in the wheel (`from saxpy import ecg0606_path`).
 - **Top-level exports** — stable API re-exported from `import saxpy`.
-- README **Quick start** and **API map** for pip-installed users.
+- README **Quick start** and import map for pip-installed users.
 - **Tier-B RRA conformance tests** — ecg0606 region and NN-distance pins (w100/w120/w150).
 
 ### Changed

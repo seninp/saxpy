@@ -381,8 +381,12 @@ A few things this makes concrete: `sax_via_window` and RePair are effectively li
 Changes since the last release
 ------------
 
-**2.0.1** (Jul 2026) — user-facing packaging (no algorithm changes). The wheel now bundles the **ecg0606** sample (`from saxpy import ecg0606_path`), stable **top-level exports** (`import saxpy`), and a README quick-start for `pip install` users. **Live on [PyPI](https://pypi.org/project/saxpy/2.0.1/).** See [CHANGELOG.md](CHANGELOG.md).
+**2.0.1** (Jul 2026) — user-facing packaging (no algorithm changes). The wheel bundles the
+**ecg0606** sample (`from saxpy import ecg0606_path`), stable top-level exports, and a
+**Getting started** section (venv-first `pip install`, quick start, import cheat sheet).
+**Live on [PyPI](https://pypi.org/project/saxpy/2.0.1/).** See [CHANGELOG.md](CHANGELOG.md).
 
+    python3 -m venv ~/venvs/saxpy && source ~/venvs/saxpy/bin/activate
     pip install saxpy==2.0.1
 
 **2.0.0** — first modern PyPI release (the only prior artifact was the legacy `1.0.1.dev167` pbr snapshot). Highlights:
