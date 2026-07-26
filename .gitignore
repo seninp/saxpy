@@ -33,3 +33,8 @@ audit/
 audit-report.html
 AGENTS.md
 *.mdc
+
+# UCR benchmark datasets — 440 MB, local-only; keep only the four tracked benchmark files
+resources/data/*
+!resources/data/Gun_Point/
+!resources/data/cbf/
